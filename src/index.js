@@ -25,6 +25,7 @@ controller.on('bot_room_join', function (bot, message) {
   console.log('bot_room_join', message)
 
   bot.reply(message, 'Dont mind me... just assuming moderatorship...')
+
   makeMyselfModerator(message.id)
     .then( () =>
       bot.reply(message, 'Done')
