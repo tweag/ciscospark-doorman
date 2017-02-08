@@ -2,6 +2,7 @@ import 'babel-polyfill'
 import controller from './controller'
 
 const bot = controller.spawn({})
+const botEmail = process.env.BOT_EMAIL
 
 controller.setupWebserver(process.env.PORT || 3000, function (err, webserver) {
   if (err) {
@@ -13,13 +14,19 @@ controller.setupWebserver(process.env.PORT || 3000, function (err, webserver) {
   })
 })
 
-const memberships = controller.api.memberships
+const api = controller.api
 
 const makeMyselfModerator = (membershipId) =>
-  memberships.get(membershipId).then((membership) => {
+  api.memberships.get(membershipId).then((membership) => {
     membership.isModerator = true
-    return memberships.update(membership)
+    return api.memberships.update(membership)
   })
+
+const stepDownAsModerator = ({ roomId }) =>
+  api.memberships.list({ roomId, personEmail: botEmail, max: 1 })
+    .then( ([membership, ..._]) =>
+      api.memberships.remove(membership)
+    )
 
 controller.on('bot_room_join', function (bot, message) {
   console.log('bot_room_join', message)
@@ -31,9 +38,25 @@ controller.on('bot_room_join', function (bot, message) {
       bot.reply(message, 'Done')
     )
     .catch( () =>
-      bot.reply(message, 'Sorry... something went wrong. Try again or have someone help you out')
+      bot.reply(message, 'Sorry... something went wrong. Try again or ask someone for help.')
     )
 })
+
+
+controller.hears(['leave'], 'direct_mention', (bot, message) => {
+  console.log('STEP DOWN', message)
+  bot.reply(message, 'Goodbye')
+
+  stepDownAsModerator(message.original_message)
+    .then( () =>
+      bot.reply(message, 'Ok. I have stepped down.')
+    )
+    .catch( (err) => {
+      console.log(err)
+      bot.reply(message, 'Apparently, I am unable. Try again or ask someone for help.')
+    })
+})
+
 
 controller.hears(['test'], 'direct_mention,direct_message', function (bot, message) {
   bot.startConversation(message, function (err, convo) {
@@ -41,7 +64,7 @@ controller.hears(['test'], 'direct_mention,direct_message', function (bot, messa
       console.log(err)
       throw err
     }
-    convo.say('Hello!')
+    convo.say('Hi!')
     convo.say('I am bot')
     convo.ask('What are you?', function (res, convo) {
       convo.say('You said ' + res.text)
