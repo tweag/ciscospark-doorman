@@ -17,7 +17,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "botkit": "../botkit"
+    "botkit": "file:../botkit-ciscospark"
   },
   "devDependencies": {
     "ava": "^0.17.0",
