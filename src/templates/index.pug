@@ -1,0 +1,21 @@
+extends layout.pug
+
+block content
+  form(method='POST')
+    p
+      input(name='email' type='email' placeholder='Email')
+
+    p
+      input(name='name' placeholder='Name')
+
+    p
+      input(name='title' placeholder='Title')
+
+    p
+      input(name='city' placeholder='city')
+
+    p
+      button Sign Me Up
+
+  pre #{Object.keys(room)}
+  pre #{JSON.stringify(room)}
