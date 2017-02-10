@@ -9,5 +9,15 @@ html
     script(type='text/javascript' src='/static/javascripts/what-input.js')
     script(type='text/javascript' src='/static/javascripts/index.js')
   body
-    h1 Doorman
-    block content
+    header.main-header
+        h1
+            img.cisco(src='/static/images/cisco.png')
+            span.spark Spark
+            img.spark-logo(src='/static/images/spark-logo.png')
+            | Doorman
+            span
+
+    .row
+        .small-12.small-centered.medium-10.large-8.columns
+            section.content-box
+                block content
