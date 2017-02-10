@@ -14,9 +14,9 @@
     "lint": "eslint .",
     "fix": "eslint . --fix",
     "webui-dummy": "babel-watch src/dummy-ui.js",
-    "webui-dummy-dev": "npm run webui-dummy & npm run watch-sass",
-    "sass": "node-sass --recursive src/stylesheets --output public/stylesheets",
-    "watch-sass": "npm run sass && npm run sass -- --watch"
+    "webui-dummy-dev": "npm run webui-dummy & npm run gulp",
+    "gulp": "gulp",
+    "gulp-build": "gulp sass"
   },
   "author": "",
   "license": "MIT",
@@ -25,7 +25,6 @@
     "pug": "^2.0.0-beta11"
   },
   "devDependencies": {
-    "node-sass": "^4.5.0",
     "ava": "^0.17.0",
     "babel-cli": "^6.18.0",
     "babel-eslint": "^7.1.1",
@@ -35,7 +34,13 @@
     "eslint": "^3.13.1",
     "eslint-config-standard": "^6.2.1",
     "eslint-plugin-promise": "^3.4.0",
-    "eslint-plugin-standard": "^2.0.1"
+    "eslint-plugin-standard": "^2.0.1",
+    "gulp": "^3.9.0",
+    "gulp-autoprefixer": "^3.1.0",
+    "gulp-load-plugins": "^1.1.0",
+    "gulp-sass": "^2.1.0",
+    "main-bower-files": "^2.13.1",
+    "node-sass": "^4.5.0"
   },
   "ava": {
     "files": [
