@@ -8,6 +8,13 @@ gulp.task('bower', function() {
     .pipe(gulp.dest('public/javascripts'))
 });
 
+const imagesDir = 'src/images';
+
+gulp.task('images', function() {
+  return gulp.src(`${imagesDir}/**/*`)
+    .pipe(gulp.dest('public/images'))
+});
+
 const sassPaths = [
   'bower_components/normalize.scss/sass',
   'bower_components/foundation-sites/scss',
@@ -44,6 +51,6 @@ gulp.task('js', function() {
     .pipe(gulp.dest('public/javascripts'));
 });
 
-gulp.task('build', ['sass', 'bower', 'js']);
+gulp.task('build', ['images', 'sass', 'bower', 'js']);
 
 gulp.task('default', ['build', 'watch-sass', 'watch-js']);

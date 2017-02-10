@@ -1,22 +1,39 @@
 extends layout.pug
 
 block content
-  h2= room.title
+  h2
+    img.chat-bubble(src='/static/images/chat-bubble.png')
+    span= room.title
 
-  p.help Fill in this form to request access to #{room.title} on Cisco Spark
+  .row.column
+    p Fill in this form to request access to #{room.title} on Cisco Spark
 
   form(method='POST')
-    p
-      input(name='email' type='email' placeholder='Email')
+    .row
+      .small-3.medium-2.columns
+        label.text-right.middle(for='email') E-mail
+      .small-9.columns.end
+        input(name='email' type='email')
 
-    p
-      input(name='name' placeholder='Name')
 
-    p
-      input(name='title' placeholder='Title')
+    .row
+      .small-3.medium-2.columns
+        label.text-right.middle(for='name') Name
+      .small-9.columns.end
+        input(name='name' type='text')
 
-    p
-      input(name='city' placeholder='city')
 
-    p
-      button Sign Me Up
+    .row
+      .small-3.medium-2.columns
+        label.text-right.middle(for='title') Title
+      .small-9.columns.end
+        input(name='title' type='text')
+
+    .row
+      .small-3.medium-2.columns
+        label.text-right.middle(for='city') City
+      .small-9.columns.end
+        input(name='city' type='text')
+
+    .row.column
+      button.large.button Sign Me Up

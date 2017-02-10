@@ -1,0 +1,77 @@
+body {
+  background: url('/static/images/spaceballs-bg.jpg');
+  background-size: cover;
+  color: $dark-gray;
+}
+
+.main-header {
+  text-align: center;
+  padding: 3rem;
+
+  h1 {
+    font-size: 1.2rem;
+    font-weight: 300;
+    color: $dark-gray;
+    
+    img.cisco {
+      width: 3rem;
+      height: auto;
+      padding: 0 .5rem;
+    }
+
+    .spark {
+      color: $primary-color;
+    }
+
+    img.spark-logo {
+      width: 3rem;
+      height: auto;
+      padding: 0 .5rem;
+    }
+  }   
+}
+
+.content-box {
+  text-align: center;
+  background: $white;
+  border-radius: 3px;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1);
+
+  @include breakpoint(medium up) {
+    padding: 2rem;
+  }
+
+  h2 {
+    font-weight: 300;
+
+    .chat-bubble {
+      width: 2.5rem;
+      height: auto;
+      padding-right: .5rem;
+    }
+  }
+
+  p {
+    font-size: 1.2rem;
+    font-weight: 300;
+    margin-bottom: 2rem;
+  }
+
+  form {
+    label {
+      color: $medium-gray;
+    }
+    input {
+      border-radius: 3px;
+
+      &:focus {
+        border-color: $primary-color;
+      }
+    }
+  }
+
+  .button {
+    border-radius: 3px;
+  }
+}
