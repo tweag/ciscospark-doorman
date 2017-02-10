@@ -3,6 +3,8 @@ extends layout.pug
 block content
   h2= room.title
 
+  p.help Fill in this form to request access to $Room on Cisco Spark
+
   form(method='POST')
     p
       input(name='email' type='email' placeholder='Email')

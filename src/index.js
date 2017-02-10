@@ -6,8 +6,13 @@ import storeBuilder from './store'
 
 const bot = controller.spawn({})
 const urls = webui.urls(process.env.PUBLIC_ADDRESS) // TODO: grab this from controller.config
-const actions = actionsBuilder(controller.api)
-const store = storeBuilder()
+const actions = actionsBuilder(controller.api, process.env.BOT_EMAIL)
+const store = storeBuilder({
+  'Y2lzY29zcGFyazovL3VzL1JPT00vZTA3ZGUyMzAtZWE0OC0xMWU2LWIwYjMtOTE4MWNlNjMzYTVk': [
+    { name: 'Alice', email: 'alice-doorman-dev@mailinator.com', title: 'CTO',  city: 'Albuquerque' },
+    { name: 'Bob',   email: 'bob-doorman-dev@mailinator.com',   title: 'Peon', city: 'Baltimore'   },
+  ]
+})
 
 controller.setupWebserver(process.env.PORT || 3000, (err, webserver) => {
   if (err) {
@@ -67,12 +72,22 @@ controller.hears(['list', 'pending', 'who'], 'direct_mention', (bot, message) =>
   )
 })
 
-const acceptRequest = (convo, request) => {
-  convo.say(`Accepting ${request.name}`)
+const acceptRequest = (convoOrMessage, request) => {
+  say(convoOrMessage, `Accepting ${request.name}`)
 }
 
-const denyRequest = (convo, request) => {
-  convo.say(`Denying ${request.name}`)
+const denyRequest = (convoOrMessage, request) => {
+  console.log('CONVO: ', convoOrMessage)
+  say(convoOrMessage, `Denying ${request.name}`)
+  // store.removeRequest(request)
+}
+
+const say = (convoOrMessage, text) => {
+  if (convoOrMessage.say) {
+    convoOrMessage.say(text)
+  } else {
+    bot.reply(convoOrMessage, text)
+  }
 }
 
 const requestList = (requests) => requests.map(

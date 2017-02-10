@@ -1,4 +1,4 @@
-export default (api) => ({
+export default (api, botEmail) => ({
   makeMyselfModerator: (membershipId) =>
     api.memberships.get(membershipId).then((membership) => {
       membership.isModerator = true
