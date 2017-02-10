@@ -58,19 +58,13 @@ controller.hears(['help'], 'direct_mention', (bot, message) => {
   bot.reply(message, `Send people here to get an invitation: ${urls.roomInvitation(message.channel)}`)
 })
 
-controller.hears(['test'], 'direct_mention,direct_message', function (bot, message) {
-  bot.startConversation(message, function (err, convo) {
-    if (err) {
-      console.log(err)
-      throw err
-    }
-    convo.say('Hi!')
-    convo.say('I am bot')
-    convo.ask('What are you?', function (res, convo) {
-      convo.say('You said ' + res.text)
-      convo.next()
-    })
-  })
+controller.hears(['list', 'pending', 'who'], 'direct_mention', (bot, message) => {
+  console.log('LIST', message)
+  const requests = store.listRequests(message.channel)
+  bot.reply(
+    message,
+    `Here are the people waiting for invitations:\n${requestList(requests)}`
+  )
 })
 
 const acceptRequest = (convo, request) => {
@@ -80,6 +74,10 @@ const acceptRequest = (convo, request) => {
 const denyRequest = (convo, request) => {
   convo.say(`Denying ${request.name}`)
 }
+
+const requestList = (requests) => requests.map(
+  ({name}, i) => `${i+1}. ${name}`
+).join("\n")
 
 const askWho = (message, requests, actionToTake) => {
   bot.startConversation(message, (err, convo) => {
@@ -102,7 +100,11 @@ const askWho = (message, requests, actionToTake) => {
         },
       },
     ]
-    convo.ask(`Who?`, patterns)
+
+    convo.ask(
+      `Who?\n${requestList(requests)}`,
+      patterns
+    )
   })
 }
 
