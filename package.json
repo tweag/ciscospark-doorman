@@ -13,7 +13,10 @@
     "transpile": "babel --out-dir=lib src",
     "lint": "eslint .",
     "fix": "eslint . --fix",
-    "dummy-ui": "babel-watch src/dummy-ui.js"
+    "webui-dummy": "babel-watch src/dummy-ui.js",
+    "webui-dummy-dev": "npm run webui-dummy & npm run watch-sass",
+    "sass": "node-sass --recursive src/stylesheets --output public/stylesheets",
+    "watch-sass": "npm run sass && npm run sass -- --watch"
   },
   "author": "",
   "license": "MIT",
@@ -22,6 +25,7 @@
     "pug": "^2.0.0-beta11"
   },
   "devDependencies": {
+    "node-sass": "^4.5.0",
     "ava": "^0.17.0",
     "babel-cli": "^6.18.0",
     "babel-eslint": "^7.1.1",

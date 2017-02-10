@@ -13,9 +13,9 @@ const urls = (publicAddress) => {
 
 const setupApp = (app, actions, store, bot) => {
   app.use(bodyParser.urlencoded())
-
   app.set('views', 'src/templates')
   app.set('view engine', 'pug')
+  app.use('/static', express.static('public'))
 
   router.get('/space/:roomId', (req, res) => {
     const { params: { roomId } } = req
