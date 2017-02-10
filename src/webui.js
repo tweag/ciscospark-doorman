@@ -29,16 +29,17 @@ const setupApp = (app, actions, store, bot) => {
   router.post('/space/:roomId', (req, res) => {
     const { params: { roomId } } = req
 
-    store.addRequest(roomId, req.body)
+    const membershipRequest = req.body
+    store.addRequest(roomId, membershipRequest)
+
+    const { name, title, city, email } = membershipRequest
 
     bot.say({
-      text: 'You got a request',
+      text: `${name}, ${title} from ${city} requests to join this space. Mention me with *accept* or *deny*`,
       channel: roomId
     })
 
-    actions.getRoom(roomId).then( (room) =>
-      res.render('thank-you', { room: room })
-    )
+    res.render('thank-you')
   })
 
   app.use('/', router)
