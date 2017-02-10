@@ -38,9 +38,10 @@ controller.on('bot_room_join', (bot, message) => {
     .then( () =>
       bot.reply(message, 'Done')
     )
-    .catch( () =>
+    .catch( (err) => {
+      console.log(err)
       bot.reply(message, 'Sorry... something went wrong. Try again or ask someone for help.')
-    )
+    })
 })
 
 

@@ -12,7 +12,8 @@
     "watch": "ava --watch",
     "transpile": "babel --out-dir=lib src",
     "lint": "eslint .",
-    "fix": "eslint . --fix"
+    "fix": "eslint . --fix",
+    "dummy-ui": "babel-watch src/dummy-ui.js"
   },
   "author": "",
   "license": "MIT",

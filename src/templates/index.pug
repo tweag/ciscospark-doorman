@@ -3,7 +3,7 @@ extends layout.pug
 block content
   h2= room.title
 
-  p.help Fill in this form to request access to $Room on Cisco Spark
+  p.help Fill in this form to request access to #{room.title} on Cisco Spark
 
   form(method='POST')
     p
@@ -20,6 +20,3 @@ block content
 
     p
       button Sign Me Up
-
-  pre #{Object.keys(room)}
-  pre #{JSON.stringify(room)}

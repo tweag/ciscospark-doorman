@@ -1,4 +1,5 @@
 import express from 'express'
+import bodyParser from 'body-parser'
 
 const router = express.Router()
 
@@ -11,12 +12,10 @@ const urls = (publicAddress) => {
 }
 
 const setupApp = (app, actions, store, bot) => {
+  app.use(bodyParser.urlencoded())
+
   app.set('views', 'src/templates')
   app.set('view engine', 'pug')
-
-  router.get('/', (req, res) => {
-    res.render('index')
-  })
 
   router.get('/space/:roomId', (req, res) => {
     const { params: { roomId } } = req
@@ -30,6 +29,7 @@ const setupApp = (app, actions, store, bot) => {
     const { params: { roomId } } = req
 
     const membershipRequest = req.body
+    console.log(membershipRequest)
     store.addRequest(roomId, membershipRequest)
 
     const { name, title, city, email } = membershipRequest
