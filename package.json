@@ -20,7 +20,7 @@
     "webui-dev": "concurrently  'npm run webui-dummy-server'  'gulp'",
     "build": "gulp build",
     "gulp": "gulp",
-    "postinstall": "bower install && gulp build",
+    "postinstall": "npm run bower install && npm run gulp build",
     "heroku-postbuild": "npm run transpile"
   },
   "author": "",
