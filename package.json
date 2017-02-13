@@ -23,7 +23,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "botkit": "file:../botkit-ciscospark",
+    "botkit": "https://cl.ly/0m2I093Z3A3k/promptworks-botkit-ciscospark-5ef6eb43d0edc6350ef04a2ba5da2a866c3b8506.tar.gz",
     "pug": "^2.0.0-beta11"
   },
   "devDependencies": {
