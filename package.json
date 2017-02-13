@@ -7,16 +7,18 @@
     "node": "~7.4"
   },
   "scripts": {
-    "start": "./inenv.sh babel-watch src/index.js",
+    "start": "npm run server  &  npm run gulp",
+    "server": "./inenv.sh babel-watch src/index.js",
+    "ngrok": "ngrok http 3000 -subdomain=doorman-dev",
     "test": "ava",
     "watch": "ava --watch",
     "transpile": "babel --out-dir=lib src",
     "lint": "eslint .",
     "fix": "eslint . --fix",
     "webui-dummy-server": "babel-watch src/dummy-ui.js",
-    "webui-dev": "npm run webui-dummy-server & npm run gulp",
+    "webui-dev": "npm run webui-dummy-server  &  npm run gulp",
     "gulp": "gulp",
-    "gulp-build": "gulp sass"
+    "gulp-build": "gulp build"
   },
   "author": "",
   "license": "MIT",
