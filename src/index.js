@@ -32,15 +32,19 @@ const api = controller.api
 controller.on('bot_room_join', (bot, message) => {
   console.log('bot_room_join', message)
 
-  bot.reply(message, 'Dont mind me... just assuming moderatorship...')
-
   actions.makeMyselfModerator(message.id)
-    .then( () =>
-      bot.reply(message, 'Done')
-    )
+    .then( () => {
+      console.log('became moderator')
+      bot.reply(message, [
+        "Hi! I'm Doorman. I can help you invite users by giving them a URL where they can request access to this room.",
+        'I took the liberty of making myself a moderator of this space so that I can add people to it.',
+        'To invite people to this room, give them this URL:',
+        urls.roomInvitation(message.channel),
+      ].join("\n"))
+    })
     .catch( (err) => {
       console.log(err)
-      bot.reply(message, 'Sorry... something went wrong. Try again or ask someone for help.')
+      bot.reply(message, 'Sorry... I was unable to make myself moderator. Try again or get some help.')
     })
 })
 
