@@ -21,7 +21,7 @@
     "build": "gulp build",
     "gulp": "gulp",
     "bower": "bower",
-    "postinstall": "npm run bower install && npm run gulp build",
+    "postinstall": "npm rebuild node-sass && npm run bower install && npm run gulp build",
     "heroku-postbuild": "npm run transpile"
   },
   "author": "",
