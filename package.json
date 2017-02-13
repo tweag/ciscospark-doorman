@@ -20,7 +20,7 @@
     "webui-dev": "concurrently  'npm run webui-dummy-server'  'npm run gulp'",
     "build": "gulp build",
     "gulp": "gulp",
-    "postinstall": "gulp build && transpile"
+    "postinstall": "transpile && bower install && gulp build"
   },
   "author": "",
   "license": "MIT",
@@ -40,14 +40,6 @@
     "main-bower-files": "^2.13.1",
     "node-sass": "^4.5.0",
 
-    "ava": "^0.17.0",
-    "concurrently": "^3.3.0",
-    "eslint": "^3.13.1",
-    "eslint-config-standard": "^6.2.1",
-    "eslint-plugin-promise": "^3.4.0",
-    "eslint-plugin-standard": "^2.0.1"
-  },
-  "devDependencies": {
     "ava": "^0.17.0",
     "concurrently": "^3.3.0",
     "eslint": "^3.13.1",
