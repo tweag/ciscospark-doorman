@@ -18,8 +18,9 @@
     "fix": "eslint . --fix",
     "webui-dummy-server": "babel-watch src/dummy-ui.js",
     "webui-dev": "npm run webui-dummy-server  &  npm run gulp",
+    "build": "gulp build",
     "gulp": "gulp",
-    "gulp-build": "gulp build"
+    "postinstall": "gulp build"
   },
   "author": "",
   "license": "MIT",
