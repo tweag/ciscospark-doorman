@@ -63,18 +63,36 @@ controller.hears(['leave'], 'direct_mention', (bot, message) => {
     })
 })
 
-controller.hears(['help'], 'direct_mention', (bot, message) => {
-  console.log('HELP', message)
-  bot.reply(message, `Send people here to get an invitation: ${urls.roomInvitation(message.channel)}`)
-})
+const displayHelp = (bot, message) => {
+  bot.reply(message, [
+    `Send people here to get an invitation: ${urls.roomInvitation(message.channel)}`,
+    'Commands I accept:',
+    '    list, pending, who - list the pending requests to join this space',
+    '    accept - accept a request to join this space',
+    '    deny - deny a request to join this space',
+    '    leave - tell Doorman to leave the space',
+    '    help - display this message',
+  ].join("\n"))
+}
+
+controller.hears([/^$/, 'help'], 'direct_mention', displayHelp)
 
 controller.hears(['list', 'pending', 'who'], 'direct_mention', (bot, message) => {
   console.log('LIST', message)
   const requests = store.listRequests(message.channel)
-  bot.reply(
-    message,
-    `Here are the people waiting for invitations:\n${requestList(requests)}`
-  )
+
+  if (requests.length) {
+
+    bot.reply(message, [
+      'Here are the people waiting for invitations:',
+      requestList(requests),
+    ].join("\n"))
+
+  } else {
+
+    bot.reply(message, 'There are no pending requests')
+
+  }
 })
 
 const acceptRequest = (convoOrMessage, request) => {
@@ -150,21 +168,13 @@ controller.hears(['accept', 'deny'], 'direct_mention', (bot, message) => {
 })
 
 
-// controller.on('self_message', function (bot, message) {
-//   console.log('Someone said', message)
-//   // a reply here could create recursion
-//   // bot.reply(message, 'You know who just said something? This guy.')
-// })
-//
-controller.on('direct_mention', function (bot, message) {
-  bot.reply(message, 'You mentioned me.')
-})
+controller.on('direct_mention', displayHelp)
 
-controller.on('direct_message', function (bot, message) {
-  bot.reply(message, 'I got your private message.', (err, worker, message) => {
-    if (err) {
-      console.log(err)
-      throw err
-    }
-  })
-})
+// controller.on('direct_message', function (bot, message) {
+//   bot.reply(message, 'I got your private message.', (err, worker, message) => {
+//     if (err) {
+//       console.log(err)
+//       throw err
+//     }
+//   })
+// })
