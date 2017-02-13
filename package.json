@@ -17,10 +17,11 @@
     "lint": "eslint .",
     "fix": "eslint . --fix",
     "webui-dummy-server": "babel-watch src/dummy-ui.js",
-    "webui-dev": "concurrently  'npm run webui-dummy-server'  'npm run gulp'",
+    "webui-dev": "concurrently  'npm run webui-dummy-server'  'gulp'",
     "build": "gulp build",
     "gulp": "gulp",
-    "postinstall": "transpile && bower install && gulp build"
+    "postinstall": "bower install && gulp build",
+    "heroku-postbuild": "npm run transpile"
   },
   "author": "",
   "license": "MIT",
