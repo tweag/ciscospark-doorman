@@ -1,27 +1,33 @@
-import uuid from 'node-uuid'
 import _ from 'lodash'
+import promisify from 'promisify-node'
+import uuid from 'node-uuid'
 
-export default (initialRequests = {}) => {
-  const requests = {}
+export default (storage) => {
+  const channels = promisify(storage.channels)
 
   const addRequest = (roomId, request) => {
-    requests[roomId] = requests[roomId] || []
     request.roomId = roomId
     request.uuid = uuid.v4()
-    requests[roomId].push(request)
+
+    updateRequests(roomId, (requests) => [...requests, request])
   }
 
-  const listRequests = (roomId) => requests[roomId] || []
+  const listRequests = (roomId) =>
+    channels.get(roomId)
+      .then( (data = {}) => data.requests || [] )
+      .catch(console.log)
 
   const removeRequest = (request) => {
-    requests[request.roomId] = _.reject(requests[request.roomId], ({uuid}) => uuid == request.uuid)
+    updateRequests(request.roomId, (requests) =>
+      _.reject(requests, ({uuid}) => uuid == request.uuid)
+    )
   }
 
-  Object.keys(initialRequests).forEach( (roomId) =>
-    initialRequests[roomId].forEach( (request) =>
-      addRequest(roomId, request)
-    )
-  )
+  const updateRequests = (roomId, cb) => {
+    listRequests(roomId)
+      .then( (requests) => channels.save({ id: roomId, requests: cb(requests) }) )
+      .catch(console.log)
+  }
 
   return { addRequest, listRequests, removeRequest }
 }

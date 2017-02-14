@@ -7,12 +7,7 @@ import storeBuilder from './store'
 const bot = controller.spawn({})
 const urls = webui.urls(process.env.PUBLIC_ADDRESS) // TODO: grab this from controller.config
 const actions = actionsBuilder(controller.api, process.env.BOT_EMAIL)
-const store = storeBuilder({
-  'Y2lzY29zcGFyazovL3VzL1JPT00vZTA3ZGUyMzAtZWE0OC0xMWU2LWIwYjMtOTE4MWNlNjMzYTVk': [
-    { name: 'Alice', email: 'alice-doorman-dev@mailinator.com', title: 'CTO',  city: 'Albuquerque' },
-    { name: 'Bob',   email: 'bob-doorman-dev@mailinator.com',   title: 'Peon', city: 'Baltimore'   },
-  ]
-})
+const store = storeBuilder(controller.storage)
 
 const undent = (str) => {
   const withoutInitialLines = str.replace(/\s*\n/, '')
@@ -93,28 +88,30 @@ controller.hears([/^$/, 'help'], 'direct_mention', displayHelp)
 
 controller.hears(['list', 'pending', 'who', 'requests'], 'direct_mention', (bot, message) => {
   console.log('LIST', message)
-  const requests = store.listRequests(message.channel)
 
-  if (requests.length) {
+  store.listRequests(message.channel).then( (requests) => {
+    console.log('requests: ', requests)
 
-    bot.reply(message, md(`
-      Here are the people waiting for invitations:
+    if (requests.length) {
 
-      ${requestList(requests)}
-    `))
+      bot.reply(message, md(`
+        Here are the people waiting for invitations:
 
-  } else {
+        ${requestList(requests)}
+      `))
 
-    bot.reply(message, 'There are no pending requests')
+    } else {
 
-  }
+      bot.reply(message, 'There are no pending requests')
+
+    }
+  })
 })
 
 const acceptRequest = (convoOrMessage, request) => {
   say(convoOrMessage, `Inviting ${request.name} to join this space`)
   actions.invite(request)
     .then( () => store.removeRequest(request) )
-    .catch( console.log )
 }
 
 const denyRequest = (convoOrMessage, request) => {
@@ -176,15 +173,15 @@ controller.hears(['accept', 'deny'], 'direct_mention', (bot, message) => {
 
   const actionToTake = acceptOrDenyAction[message.match[0]]
 
-  const requests = store.listRequests(message.channel)
-
-  if (requests.length === 0) {
-    bot.reply(message, "There are no pending requests")
-  } else if (requests.length === 1) {
-    actionToTake(message, requests[0])
-  } else {
-    askWho(message, requests, actionToTake)
-  }
+  store.listRequests(message.channel).then( (requests) => {
+    if (requests.length === 0) {
+      bot.reply(message, "There are no pending requests")
+    } else if (requests.length === 1) {
+      actionToTake(message, requests[0])
+    } else {
+      askWho(message, requests, actionToTake)
+    }
+  })
 })
 
 
