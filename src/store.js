@@ -14,7 +14,7 @@ export default (storage) => {
 
   const listRequests = (roomId) =>
     channels.get(roomId)
-      .then( (data = {}) => data.requests || [] )
+      .then( (data) => (data && data.requests) || [] )
       .catch(console.log)
 
   const removeRequest = (request) => {

@@ -8,9 +8,10 @@
   },
   "scripts": {
     "prod": "node lib/index.js",
-    "start": "concurrently  'npm run server-dev'  'gulp'",
+    "start": "concurrently  'npm run server-dev'  'gulp'  'npm run redis'",
     "server-dev": "./inenv.sh babel-watch src/index.js",
     "ngrok": "ngrok http 3000 -subdomain=doorman-dev",
+    "redis": "redis-server",
     "test": "ava",
     "watch": "ava --watch",
     "transpile": "babel --out-dir=lib src",
@@ -28,6 +29,7 @@
   "license": "MIT",
   "dependencies": {
     "botkit": "https://cl.ly/0m2I093Z3A3k/promptworks-botkit-ciscospark-5ef6eb43d0edc6350ef04a2ba5da2a866c3b8506.tar.gz",
+    "botkit-storage-redis": "^1.1.0",
     "pug": "^2.0.0-beta11",
 
     "babel-cli": "^6.18.0",
