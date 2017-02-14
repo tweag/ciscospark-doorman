@@ -16,4 +16,8 @@ export default (api, botEmail) => ({
   getRoom: (id) =>
     api.rooms.list({ id, max: 1 }).then( ([room, ..._]) => room )
   ,
+
+  invite: ({roomId, email}) =>
+    api.memberships.create({ roomId, personEmail: email })
+  ,
 })

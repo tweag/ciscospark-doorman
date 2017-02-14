@@ -28,7 +28,7 @@ const md = (str) => {
   const undented = undent(str)
   return {
     markdown: undented,
-    text: undented, // if you don't send `text`, sometimes Botkit won't send the message
+    text: undented, // if you don't send `text`, *sometimes* Botkit won't send the message
   }
 }
 
@@ -38,9 +38,7 @@ controller.setupWebserver(process.env.PORT || 3000, (err, webserver) => {
     throw err
   }
 
-  controller.createWebhookEndpoints(webserver, bot, () =>
-    console.log('SPARK: Webhooks set up!')
-  )
+  controller.createWebhookEndpoints(webserver, bot, () => console.log('SPARK: Webhooks set up!'))
 
   webui.setupApp(webserver, actions, store, bot)
 })
@@ -113,8 +111,10 @@ controller.hears(['list', 'pending', 'who', 'requests'], 'direct_mention', (bot,
 })
 
 const acceptRequest = (convoOrMessage, request) => {
-  say(convoOrMessage, `Inviting ${request.name} to join this space. (Not really... yet)`)
-  store.removeRequest(request)
+  say(convoOrMessage, `Inviting ${request.name} to join this space`)
+  actions.invite(request)
+    .then( () => store.removeRequest(request) )
+    .catch( console.log )
 }
 
 const denyRequest = (convoOrMessage, request) => {
