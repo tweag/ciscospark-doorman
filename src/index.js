@@ -6,7 +6,8 @@ import storeBuilder from './store'
 
 const bot = controller.spawn({})
 const urls = webui.urls(process.env.PUBLIC_ADDRESS) // TODO: grab this from controller.config
-const actions = actionsBuilder(controller.api, process.env.BOT_EMAIL)
+const botEmail = process.env.BOT_EMAIL
+const actions = actionsBuilder(controller.api, botEmail)
 const store = storeBuilder(controller.storage)
 
 const undent = (str) => {
@@ -43,31 +44,90 @@ const api = controller.api
 controller.on('bot_room_join', (bot, message) => {
   console.log('bot_room_join', message)
 
-  actions.makeMyselfModerator(message.id)
+  const welcomeText =
+    "Hi! I'm Doorman. I can help you invite users by giving them a URL where they can request access to this room."
+
+  actions.makeUserModerator(message.channel, { personEmail: botEmail })
     .then( () => {
       console.log('became moderator')
       bot.reply(message, undent(`
-        Hi! I'm Doorman. I can help you invite users by giving them a URL where they can request access to this room.
+        ${welcomeText}
         I took the liberty of making myself a moderator of this space so that I can add people to it.
         To invite people to this room, give them this URL:
         ${urls.roomInvitation(message.channel)}
       `))
+      store.markAskedForModeratorship(message.channel, false)
     })
     .catch( (err) => {
-      console.log(err)
-      bot.reply(message, 'Sorry... I was unable to make myself moderator. Try again or get some help.')
+      console.log('could not become moderator')
+      bot.reply(message, undent(`
+        ${welcomeText}
+        Before we get started, you need to make me a moderator. The People menu is up there ↗️
+      `))
+      store.markAskedForModeratorship(message.channel, true)
     })
 })
 
 
+controller.on('memberships.updated', (bot, message) => {
+  console.log('memberships.updated', message)
+
+  const { isModerator, personEmail } = message.original_message.data
+
+  if (isModerator && personEmail == botEmail) {
+
+    store.didAskForModeratorship(message.channel).then( (asked) => {
+      if (asked) {
+        bot.reply(message, undent(`
+          Wonderful! Thanks for making me a moderator. Now we can get started.
+          To invite people to this room, give them this URL:
+          ${urls.roomInvitation(message.channel)}
+        `))
+        store.markAskedForModeratorship(message.channel, null)
+      }
+    })
+  }
+})
+
+
+controller.hears(['make me moderator'], 'direct_mention', (bot, message) => {
+  actions.makeUserModerator(message.channel, { personId: message.original_message.personId })
+    .then( () => bot.reply(message, 'done') )
+    .catch( (err) => {
+      console.log(err)
+      bot.reply(message, 'Sorry... I was unable to make you moderator.')
+    })
+})
+
+controller.hears(['make yourself moderator'], 'direct_mention', (bot, message) => {
+  actions.makeUserModerator(message.channel, { personEmail: botEmail })
+    .catch( (err) => {
+      console.log(err)
+      bot.reply(message, 'Sorry... I was unable to make myself moderator.')
+    })
+})
+
+
+
 controller.hears(['leave'], 'direct_mention', (bot, message) => {
-  console.log('STEP DOWN', message)
+  console.log('LEAVE', message)
   bot.reply(message, 'Goodbye')
 
-  actions.stepDownAsModerator(message.original_message)
+  actions.leaveRoom(message.channel, botEmail)
     .catch( (err) => {
       console.log(err)
       bot.reply(message, 'Apparently, I am unable. Try again or ask someone for help.')
+    })
+})
+
+controller.hears(['step down'], 'direct_mention', (bot, message) => {
+  console.log('STEP DOWN', message)
+  bot.reply(message, 'Goodbye')
+
+  actions.stepDownAsModerator(message.channel, botEmail)
+    .catch( (err) => {
+      console.log(err)
+      bot.reply(message, 'Apparently, I am unable.')
     })
 })
 
