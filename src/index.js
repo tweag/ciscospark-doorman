@@ -14,6 +14,24 @@ const store = storeBuilder({
   ]
 })
 
+const undent = (str) => {
+  const withoutInitialLines = str.replace(/\s*\n/, '')
+  const indentation = withoutInitialLines.match(/^\s*/)[0]
+  return withoutInitialLines
+    .split(/\n/)
+    .map( (s) => s.replace(indentation, '') )
+    .join("\n")
+    .trim()
+}
+
+const md = (str) => {
+  const undented = undent(str)
+  return {
+    markdown: undented,
+    text: undented, // if you don't send `text`, sometimes Botkit won't send the message
+  }
+}
+
 controller.setupWebserver(process.env.PORT || 3000, (err, webserver) => {
   if (err) {
     console.log(err)
@@ -35,12 +53,12 @@ controller.on('bot_room_join', (bot, message) => {
   actions.makeMyselfModerator(message.id)
     .then( () => {
       console.log('became moderator')
-      bot.reply(message, [
-        "Hi! I'm Doorman. I can help you invite users by giving them a URL where they can request access to this room.",
-        'I took the liberty of making myself a moderator of this space so that I can add people to it.',
-        'To invite people to this room, give them this URL:',
-        urls.roomInvitation(message.channel),
-      ].join("\n"))
+      bot.reply(message, undent(`
+        Hi! I'm Doorman. I can help you invite users by giving them a URL where they can request access to this room.
+        I took the liberty of making myself a moderator of this space so that I can add people to it.
+        To invite people to this room, give them this URL:
+        ${urls.roomInvitation(message.channel)}
+      `))
     })
     .catch( (err) => {
       console.log(err)
@@ -54,39 +72,38 @@ controller.hears(['leave'], 'direct_mention', (bot, message) => {
   bot.reply(message, 'Goodbye')
 
   actions.stepDownAsModerator(message.original_message)
-    .then( () =>
-      bot.reply(message, 'Ok. I have stepped down.')
-    )
     .catch( (err) => {
       console.log(err)
       bot.reply(message, 'Apparently, I am unable. Try again or ask someone for help.')
     })
 })
 
-const displayHelp = (bot, message) => {
-  bot.reply(message, [
-    `Send people here to get an invitation: ${urls.roomInvitation(message.channel)}`,
-    'Commands I accept:',
-    '    list, pending, who - list the pending requests to join this space',
-    '    accept - accept a request to join this space',
-    '    deny - deny a request to join this space',
-    '    leave - tell Doorman to leave the space',
-    '    help - display this message',
-  ].join("\n"))
-}
+const displayHelp = (bot, message) =>
+  bot.reply(message, md(`
+    Send people here to get an invitation: ${urls.roomInvitation(message.channel)}
+
+    Things I can do:
+
+    - list — list the pending requests to join this space
+    - accept — accept a request to join this space
+    - deny — deny a request to join this space
+    - leave — tell Doorman to leave the space
+    - help — display this message
+  `))
 
 controller.hears([/^$/, 'help'], 'direct_mention', displayHelp)
 
-controller.hears(['list', 'pending', 'who'], 'direct_mention', (bot, message) => {
+controller.hears(['list', 'pending', 'who', 'requests'], 'direct_mention', (bot, message) => {
   console.log('LIST', message)
   const requests = store.listRequests(message.channel)
 
   if (requests.length) {
 
-    bot.reply(message, [
-      'Here are the people waiting for invitations:',
-      requestList(requests),
-    ].join("\n"))
+    bot.reply(message, md(`
+      Here are the people waiting for invitations:
+
+      ${requestList(requests)}
+    `))
 
   } else {
 
@@ -96,13 +113,14 @@ controller.hears(['list', 'pending', 'who'], 'direct_mention', (bot, message) =>
 })
 
 const acceptRequest = (convoOrMessage, request) => {
-  say(convoOrMessage, `Accepting ${request.name}`)
+  say(convoOrMessage, `Inviting ${request.name} to join this space. (Not really... yet)`)
+  store.removeRequest(request)
 }
 
 const denyRequest = (convoOrMessage, request) => {
   console.log('CONVO: ', convoOrMessage)
   say(convoOrMessage, `Denying ${request.name}`)
-  // store.removeRequest(request)
+  store.removeRequest(request)
 }
 
 const say = (convoOrMessage, text) => {
@@ -113,9 +131,7 @@ const say = (convoOrMessage, text) => {
   }
 }
 
-const requestList = (requests) => requests.map(
-  ({name}, i) => `${i+1}. ${name}`
-).join("\n")
+const requestList = (requests) => requests.map( ({name}) => `1. ${name}` ).join("\n")
 
 const askWho = (message, requests, actionToTake) => {
   bot.startConversation(message, (err, convo) => {
@@ -131,7 +147,7 @@ const askWho = (message, requests, actionToTake) => {
       {
         pattern: /.*/,
         callback: (response, convo) => {
-          console.log("did not understand", response)
+          console.log('did not understand', response)
           convo.say("I didn't catch that")
           convo.repeat()
           convo.next()
@@ -140,7 +156,11 @@ const askWho = (message, requests, actionToTake) => {
     ]
 
     convo.ask(
-      `Who?\n${requestList(requests)}`,
+      md(`
+        Who?
+
+        ${requestList(requests)}
+      `),
       patterns
     )
   })

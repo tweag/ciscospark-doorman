@@ -35,7 +35,7 @@ const setupApp = (app, actions, store, bot) => {
     const { name, title, city, email } = membershipRequest
 
     bot.say({
-      text: `${name}, ${title} from ${city} requests to join this space. Mention me with *accept* or *deny*`,
+      markdown: `**${name}** (${title}) from ${city} requests to join this space. Mention me with **accept** or **deny**`,
       channel: roomId
     })
 
