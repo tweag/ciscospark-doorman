@@ -108,16 +108,17 @@ controller.hears(['make yourself moderator'], 'direct_mention', (bot, message) =
 })
 
 
-
 controller.hears(['leave'], 'direct_mention', (bot, message) => {
   console.log('LEAVE', message)
-  bot.reply(message, 'Goodbye')
+  requireModerator(bot, message).then( () => {
+    bot.reply(message, 'Goodbye')
 
-  actions.leaveRoom(message.channel, botEmail)
-    .catch( (err) => {
-      console.log(err)
-      bot.reply(message, 'Apparently, I am unable. Try again or ask someone for help.')
-    })
+    actions.leaveRoom(message.channel, botEmail)
+      .catch( (err) => {
+        console.log(err)
+        bot.reply(message, 'Apparently, I am unable. Try again or ask someone for help.')
+      })
+  })
 })
 
 controller.hears(['step down'], 'direct_mention', (bot, message) => {
@@ -228,30 +229,34 @@ const acceptOrDenyAction = {
   deny: denyRequest,
 }
 
+const requireModerator = (bot, message) =>
+  actions.findMembership(message.channel, {personEmail: message.user})
+    .then( ({isModerator}) => {
+      if (!isModerator) {
+        bot.reply(message, 'Sorry, I only answer to moderators')
+        return Promise.reject()
+      }
+    })
+
 controller.hears(['accept', 'deny'], 'direct_mention', (bot, message) => {
   console.log('ACCEPT/DENY', message)
 
-  const actionToTake = acceptOrDenyAction[message.match[0]]
+  requireModerator(bot, message).then( () => {
+    console.log('GOING THROUGH WITH IT')
 
-  store.listRequests(message.channel).then( (requests) => {
-    if (requests.length === 0) {
-      bot.reply(message, "There are no pending requests")
-    } else if (requests.length === 1) {
-      actionToTake(message, requests[0])
-    } else {
-      askWho(message, requests, actionToTake)
-    }
+    const actionToTake = acceptOrDenyAction[message.match[0]]
+
+    store.listRequests(message.channel).then( (requests) => {
+      if (requests.length === 0) {
+        bot.reply(message, 'There are no pending requests')
+      } else if (requests.length === 1) {
+        actionToTake(message, requests[0])
+      } else {
+        askWho(message, requests, actionToTake)
+      }
+    })
   })
 })
 
 
 controller.on('direct_mention', displayHelp)
-
-// controller.on('direct_message', function (bot, message) {
-//   bot.reply(message, 'I got your private message.', (err, worker, message) => {
-//     if (err) {
-//       console.log(err)
-//       throw err
-//     }
-//   })
-// })

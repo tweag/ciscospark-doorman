@@ -1,23 +1,20 @@
 export default (api) => {
   const makeMemberModerator = (membershipId, isModerator) =>
-    api.memberships.get(membershipId).then((membership) => {
-      membership.isModerator = isModerator
-      return api.memberships.update(membership)
-    })
+    api.memberships.get(membershipId).then( (membership) =>
+      api.memberships.update({ ...membership, isModerator })
+    )
 
-  const makeUserModerator = (roomId, membershipParams) =>
-    api.memberships.list({...membershipParams, roomId, max: 1})
-      .then( ([{id}]) => makeMemberModerator(id, true) )
+  const findMembership = (roomId, userParams) =>
+    api.memberships.list({...userParams, roomId, max: 1}).then( ([membership]) => membership )
+
+  const makeUserModerator = (roomId, userParams) =>
+    findMembership(roomId, userParams).then( ({id}) => makeMemberModerator(id, true) )
 
   const stepDownAsModerator = (roomId, personEmail) =>
-    api.memberships.list({...membershipParams, roomId, max: 1})
-      .then( ([{id}]) => makeMemberModerator(id, false) )
+    findMembership(roomId, {personEmail}).then( ({id}) => makeMemberModerator(id, false) )
 
   const leaveRoom = (roomId, personEmail) =>
-    api.memberships.list({ roomId, personEmail, max: 1 })
-      .then( ([membership, ..._]) =>
-        api.memberships.remove(membership)
-      )
+    findMembership(roomId, {personEmail}).then( (membership) => api.memberships.remove(membership) )
 
   const getRoom = (id) =>
     api.rooms.list({ id, max: 1 }).then( ([room, ..._]) => room )
@@ -26,6 +23,7 @@ export default (api) => {
     api.memberships.create({ roomId, personEmail: email })
 
   return {
+    findMembership,
     getRoom,
     invite,
     leaveRoom,
