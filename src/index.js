@@ -116,7 +116,7 @@ controller.hears(['leave'], 'direct_mention', (bot, message) => {
     actions.leaveRoom(message.channel, botEmail)
       .catch( (err) => {
         console.log(err)
-        bot.reply(message, 'Apparently, I am unable. Try again or ask someone for help.')
+        bot.reply(message, `Apparently, I am unable. Try again or ask someone for help. \n\n${err.stack}`)
       })
   })
 })

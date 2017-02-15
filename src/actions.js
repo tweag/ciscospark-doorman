@@ -5,7 +5,15 @@ export default (api) => {
     )
 
   const findMembership = (roomId, userParams) =>
-    api.memberships.list({...userParams, roomId, max: 1}).then( ([membership]) => membership )
+    api.memberships.list({...userParams, roomId, max: 1})
+      .then( ([membership, ...rest]) => {
+        if (rest.length) {
+          console.log("found other memberships: ", rest)
+          throw new Error(`Found other memberships with the same params: ${JSON.stringify(rest)}`)
+        }
+
+        return membership
+      })
 
   const makeUserModerator = (roomId, userParams) =>
     findMembership(roomId, userParams).then( ({id}) => makeMemberModerator(id, true) )
