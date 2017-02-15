@@ -21,9 +21,6 @@ export default (api) => {
   const stepDownAsModerator = (roomId, personEmail) =>
     findMembership(roomId, {personEmail}).then( ({id}) => makeMemberModerator(id, false) )
 
-  const leaveRoom = (roomId, personEmail) =>
-    findMembership(roomId, {personEmail}).then( (membership) => api.memberships.remove(membership) )
-
   const getRoom = (id) =>
     api.rooms.list({ id, max: 1 }).then( ([room, ..._]) => room )
 
@@ -34,7 +31,6 @@ export default (api) => {
     findMembership,
     getRoom,
     invite,
-    leaveRoom,
     makeMemberModerator,
     makeUserModerator,
     stepDownAsModerator,

@@ -108,19 +108,6 @@ controller.hears(['make yourself moderator'], 'direct_mention', (bot, message) =
 })
 
 
-controller.hears(['leave'], 'direct_mention', (bot, message) => {
-  console.log('LEAVE', message)
-  requireModerator(bot, message).then( () => {
-    bot.reply(message, 'Goodbye')
-
-    actions.leaveRoom(message.channel, botEmail)
-      .catch( (err) => {
-        console.log(err)
-        bot.reply(message, `Apparently, I am unable. Try again or ask someone for help. \n\n${err.stack}`)
-      })
-  })
-})
-
 controller.hears(['step down'], 'direct_mention', (bot, message) => {
   console.log('STEP DOWN', message)
   bot.reply(message, 'Goodbye')
@@ -141,7 +128,6 @@ const displayHelp = (bot, message) =>
     - list — list the pending requests to join this space
     - accept — accept a request to join this space
     - deny — deny a request to join this space
-    - leave — tell Doorman to leave the space
     - help — display this message
   `))
 
