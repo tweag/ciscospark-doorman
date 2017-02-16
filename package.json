@@ -13,7 +13,7 @@
     "ngrok": "ngrok http 3000 -subdomain=doorman-dev",
     "redis": "redis-server",
     "test": "ava",
-    "watch": "ava --watch",
+    "test-watch": "ava --watch",
     "transpile": "babel --out-dir=lib src",
     "lint": "eslint .",
     "fix": "eslint . --fix",
@@ -28,10 +28,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "botkit": "https://cl.ly/0m2I093Z3A3k/promptworks-botkit-ciscospark-5ef6eb43d0edc6350ef04a2ba5da2a866c3b8506.tar.gz",
-    "botkit-storage-redis": "^1.1.0",
-    "pug": "^2.0.0-beta11",
-
+    "ava": "^0.17.0",
     "babel-cli": "^6.18.0",
     "babel-core": "^6.22.1",
     "babel-eslint": "^7.1.1",
@@ -39,7 +36,14 @@
     "babel-polyfill": "^6.20.0",
     "babel-preset-env": "^1.1.8",
     "babel-watch": "^2.0.5",
+    "botkit": "https://cl.ly/0m2I093Z3A3k/promptworks-botkit-ciscospark-5ef6eb43d0edc6350ef04a2ba5da2a866c3b8506.tar.gz",
+    "botkit-storage-redis": "^1.1.0",
     "bower": "^1.8.0",
+    "concurrently": "^3.3.0",
+    "eslint": "^3.13.1",
+    "eslint-config-standard": "^6.2.1",
+    "eslint-plugin-promise": "^3.4.0",
+    "eslint-plugin-standard": "^2.0.1",
     "gulp": "^3.9.0",
     "gulp-autoprefixer": "^3.1.0",
     "gulp-load-plugins": "^1.1.0",
@@ -47,13 +51,7 @@
     "main-bower-files": "^2.13.1",
     "node-sass": "^4.5.0",
     "promisify-node": "^0.4.0",
-
-    "ava": "^0.17.0",
-    "concurrently": "^3.3.0",
-    "eslint": "^3.13.1",
-    "eslint-config-standard": "^6.2.1",
-    "eslint-plugin-promise": "^3.4.0",
-    "eslint-plugin-standard": "^2.0.1"
+    "pug": "^2.0.0-beta11"
   },
   "ava": {
     "files": [

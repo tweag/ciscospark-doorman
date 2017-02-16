@@ -21,7 +21,6 @@ export default storage => {
   const listRequests = roomId =>
     channelGet(roomId)
       .then( ({requests}) => requests || [] )
-      .catch(console.log)
 
   const removeRequest = request =>
     updateRequests(request.roomId, requests =>
@@ -31,7 +30,6 @@ export default storage => {
   const updateRequests = (roomId, cb) =>
     listRequests(roomId)
       .then( requests => channels.save({ id: roomId, requests: cb(requests) }) )
-      .catch(console.log)
 
   const markAskedForModeratorship = (roomId, asked) =>
     channels.save({ id: roomId, askedForModeratorship: asked })
@@ -41,9 +39,10 @@ export default storage => {
 
   return {
     addRequest,
-    didAskForModeratorship,
     listRequests,
-    markAskedForModeratorship,
     removeRequest,
+
+    didAskForModeratorship,
+    markAskedForModeratorship,
   }
 }
