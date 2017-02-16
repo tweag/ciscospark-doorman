@@ -12,17 +12,17 @@ const botEmail = process.env.BOT_EMAIL
 const actions = actionsBuilder(controller.api, botEmail)
 const store = storeBuilder(controller.storage)
 
-const undent = (str) => {
+const undent = str => {
   const withoutInitialLines = str.replace(/\s*\n/, '')
   const indentation = withoutInitialLines.match(/^\s*/)[0]
   return withoutInitialLines
     .split(/\n/)
-    .map( (s) => s.replace(indentation, '') )
+    .map( s => s.replace(indentation, '') )
     .join("\n")
     .trim()
 }
 
-const md = (str) => {
+const md = str => {
   const undented = undent(str)
   return {
     markdown: undented,
@@ -60,7 +60,7 @@ controller.on('bot_room_join', (bot, message) => {
       `))
       store.markAskedForModeratorship(message.channel, false)
     })
-    .catch( (err) => {
+    .catch( err => {
       console.log('could not become moderator')
       bot.reply(message, undent(`
         ${welcomeText}
@@ -78,7 +78,7 @@ controller.on('memberships.updated', (bot, message) => {
 
   if (isModerator && personEmail == botEmail) {
 
-    store.didAskForModeratorship(message.channel).then( (asked) => {
+    store.didAskForModeratorship(message.channel).then( asked => {
       if (asked) {
         bot.reply(message, undent(`
           Wonderful! Thanks for making me a moderator. Now we can get started.
@@ -95,7 +95,7 @@ controller.on('memberships.updated', (bot, message) => {
 controller.hears(['make me moderator'], 'direct_mention', (bot, message) => {
   actions.makeUserModerator(message.channel, { personId: message.original_message.personId })
     .then( () => bot.reply(message, 'done') )
-    .catch( (err) => {
+    .catch( err => {
       console.log(err)
       bot.reply(message, 'Sorry... I was unable to make you moderator.')
     })
@@ -103,7 +103,7 @@ controller.hears(['make me moderator'], 'direct_mention', (bot, message) => {
 
 controller.hears(['make yourself moderator'], 'direct_mention', (bot, message) => {
   actions.makeUserModerator(message.channel, { personEmail: botEmail })
-    .catch( (err) => {
+    .catch( err => {
       console.log(err)
       bot.reply(message, 'Sorry... I was unable to make myself moderator.')
     })
@@ -115,7 +115,7 @@ controller.hears(['step down'], 'direct_mention', (bot, message) => {
   bot.reply(message, 'Goodbye')
 
   actions.stepDownAsModerator(message.channel, botEmail)
-    .catch( (err) => {
+    .catch( err => {
       console.log(err)
       bot.reply(message, 'Apparently, I am unable.')
     })
@@ -138,7 +138,7 @@ controller.hears([/^$/, 'help'], 'direct_mention', displayHelp)
 controller.hears(['list', 'pending', 'who', 'requests'], 'direct_mention', (bot, message) => {
   console.log('LIST', message)
 
-  store.listRequests(message.channel).then( (requests) => {
+  store.listRequests(message.channel).then( requests => {
     console.log('requests: ', requests)
 
     if (requests.length) {
@@ -178,7 +178,7 @@ const say = (convoOrMessage, text) => {
   }
 }
 
-const requestList = (requests) => requests.map( ({name}) => `1. ${name}` ).join("\n")
+const requestList = requests => requests.map( ({name}) => `1. ${name}` ).join("\n")
 
 const acceptOrDenyActions = {
   accept: acceptRequest,
@@ -243,7 +243,7 @@ const requireModerator = (bot, message) =>
 const acceptCommands = ['accept', 'invite', 'allow']
 const denyCommands = ['deny', 'reject', 'disallow']
 
-const actualCommand = (writtenCommand) => {
+const actualCommand = writtenCommand => {
   const command = writtenCommand.toLowerCase()
   if (_.includes(acceptCommands, command)) {
     return 'accept'
@@ -254,12 +254,12 @@ const actualCommand = (writtenCommand) => {
   }
 }
 
-const parseAcceptOrDenyCommand = (message) => ({
+const parseAcceptOrDenyCommand = message => ({
   command: actualCommand(message.match[1]),
   name: message.match[3],
 })
 
-const matchRequest = (name, requests) => _.find(requests, (request) => request.name.toLowerCase() == name.toLowerCase())
+const matchRequest = (name, requests) => _.find(requests, request => request.name.toLowerCase() == name.toLowerCase())
 
 const handleAcceptOrDeny = (bot, message) => {
   console.log('ACCEPT/DENY', message)
@@ -267,7 +267,7 @@ const handleAcceptOrDeny = (bot, message) => {
   requireModerator(bot, message).then( () => {
     console.log('GOING THROUGH WITH IT')
 
-    store.listRequests(message.channel).then( (requests) => {
+    store.listRequests(message.channel).then( requests => {
       console.log('REQUESTS', requests)
 
       if (requests.length === 0) {

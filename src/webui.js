@@ -3,11 +3,11 @@ import bodyParser from 'body-parser'
 
 const router = express.Router()
 
-const urls = (publicAddress) => {
-  const url = (path) => `${publicAddress}${path}`
+const urls = publicAddress => {
+  const url = path => `${publicAddress}${path}`
 
   return {
-    roomInvitation: (roomId) => url(`space/${roomId}`)
+    roomInvitation: roomId => url(`space/${roomId}`)
   }
 }
 
@@ -20,7 +20,7 @@ const setupApp = (app, actions, store, bot) => {
   router.get('/space/:roomId', (req, res) => {
     const { params: { roomId } } = req
 
-    actions.getRoom(roomId).then( (room) =>
+    actions.getRoom(roomId).then( room =>
       res.render('index', { room: room })
     )
   })

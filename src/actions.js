@@ -1,6 +1,6 @@
-export default (api) => {
+export default api => {
   const makeMemberModerator = (membershipId, isModerator) =>
-    api.memberships.get(membershipId).then( (membership) =>
+    api.memberships.get(membershipId).then( membership =>
       api.memberships.update({ ...membership, isModerator })
     )
 
@@ -21,7 +21,7 @@ export default (api) => {
   const stepDownAsModerator = (roomId, personEmail) =>
     findMembership(roomId, {personEmail}).then( ({id}) => makeMemberModerator(id, false) )
 
-  const getRoom = (id) =>
+  const getRoom = id =>
     api.rooms.list({ id, max: 1 }).then( ([room, ..._]) => room )
 
   const invite = ({roomId, email}) =>
