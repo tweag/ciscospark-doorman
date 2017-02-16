@@ -13,7 +13,14 @@ const botEmail = process.env.BOT_EMAIL
 const actions = actionsBuilder(controller.api, botEmail)
 const store = storeBuilder(controller.storage)
 
-const u = str => unindent(str, { trim: true })
+const u = str =>
+  str
+    .split("\n")
+    .map( (s) =>
+      s.replace(/^\s+/, '')
+    )
+    .join("\n")
+    .trim()
 
 const md = str => ({
   markdown: u(str),
@@ -33,131 +40,138 @@ controller.setupWebserver(process.env.PORT || 3000, (err, webserver) => {
 
 const api = controller.api
 
-controller.on('bot_room_join', (bot, message) => {
+controller.on('bot_room_join', async (bot, message) => {
   console.log('bot_room_join', message)
 
   const welcomeText =
     "Hi! I'm Doorman. I can help you invite users by giving them a URL where they can request access to this room."
 
-  actions.makeUserModerator(message.channel, { personEmail: botEmail })
-    .then( () => {
-      console.log('became moderator')
-      bot.reply(message, u(`
-        ${welcomeText}
-        I took the liberty of making myself a moderator of this space so that I can add people to it.
-        To invite people to this room, give them this URL:
-        ${urls.roomInvitation(message.channel)}
-      `))
-      store.markAskedForModeratorship(message.channel, false)
-    })
-    .catch( err => {
-      console.log('could not become moderator')
-      bot.reply(message, u(`
-        ${welcomeText}
-        Before we get started, you need to make me a moderator. The People menu is up there ↗️
-      `))
-      store.markAskedForModeratorship(message.channel, true)
-    })
+  let askedForModeratorship
+
+  try {
+    await actions.makeUserModerator(message.channel, { personEmail: botEmail })
+
+    console.log('became moderator')
+    bot.reply(message, u(`
+      ${welcomeText}
+      I took the liberty of making myself a moderator of this space so that I can add people to it.
+      To invite people to this room, give them this URL:
+      ${urls.roomInvitation(message.channel)}
+    `))
+
+    askedForModeratorship = false
+
+  } catch (e) {
+
+    console.log('could not become moderator')
+    bot.reply(message, u(`
+      ${welcomeText}
+      Before we get started, you need to make me a moderator. The People menu is up there ↗️
+    `))
+
+    askedForModeratorship = true
+  }
+
+  await store.markAskedForModeratorship(message.channel, askedForModeratorship)
 })
 
 
-controller.on('memberships.updated', (bot, message) => {
+controller.on('memberships.updated', async (bot, message) => {
   console.log('memberships.updated', message)
 
   const { isModerator, personEmail } = message.original_message.data
 
-  if (isModerator && personEmail == botEmail) {
+  if (isModerator
+    && personEmail == botEmail
+    && await store.didAskForModeratorship(message.channel)) {
 
-    store.didAskForModeratorship(message.channel).then( asked => {
-      if (asked) {
-        bot.reply(message, u(`
-          Wonderful! Thanks for making me a moderator. Now we can get started.
-          To invite people to this room, give them this URL:
-          ${urls.roomInvitation(message.channel)}
-        `))
-        store.markAskedForModeratorship(message.channel, null)
-      }
-    })
+    bot.reply(message, u(`
+      Wonderful! Thanks for making me a moderator. Now we can get started.
+      To invite people to this room, give them this URL:
+      ${urls.roomInvitation(message.channel)}
+    `))
+
+    // Remove the mark in case the bot gets removed and re-added
+    store.markAskedForModeratorship(message.channel, null)
   }
 })
 
 
-controller.hears(['make me moderator'], 'direct_mention', (bot, message) => {
-  actions.makeUserModerator(message.channel, { personId: message.original_message.personId })
-    .then( () => bot.reply(message, 'done') )
-    .catch( err => {
-      console.log(err)
-      bot.reply(message, 'Sorry... I was unable to make you moderator.')
-    })
+controller.hears(['make me moderator'], 'direct_mention', async (bot, message) => {
+  try {
+    await actions.makeUserModerator(message.channel, { personId: message.original_message.personId })
+    bot.reply(message, 'done')
+  } catch (err) {
+    console.log(err)
+    bot.reply(message, 'Sorry... I was unable to make you moderator.')
+  }
 })
 
-controller.hears(['make yourself moderator'], 'direct_mention', (bot, message) => {
-  actions.makeUserModerator(message.channel, { personEmail: botEmail })
-    .catch( err => {
-      console.log(err)
-      bot.reply(message, 'Sorry... I was unable to make myself moderator.')
-    })
+controller.hears(['make yourself moderator'], 'direct_mention', async (bot, message) => {
+  try {
+    await actions.makeUserModerator(message.channel, { personEmail: botEmail })
+  } catch (err) {
+    console.log(err)
+    bot.reply(message, 'Sorry... I was unable to make myself moderator.')
+  }
 })
 
 
-controller.hears(['step down'], 'direct_mention', (bot, message) => {
+controller.hears(['step down'], 'direct_mention', async (bot, message) => {
   console.log('STEP DOWN', message)
-  bot.reply(message, 'Goodbye')
+  bot.reply(message, 'Stepping down')
 
-  actions.stepDownAsModerator(message.channel, botEmail)
-    .catch( err => {
-      console.log(err)
-      bot.reply(message, 'Apparently, I am unable.')
-    })
+  try {
+    await actions.stepDownAsModerator(message.channel, botEmail)
+  } catch (err) {
+    bot.reply(message, 'Apparently, I am unable.')
+  }
 })
 
-const displayHelp = (bot, message) =>
-  bot.reply(message, md(`
-    Send people here to get an invitation: ${urls.roomInvitation(message.channel)}
+const displayHelp = (bot, message) => bot.reply(message, md(`
+  Send people here to get an invitation: ${urls.roomInvitation(message.channel)}
 
-    Things I can do:
+  Things I can do:
 
-    - **list** — list the pending requests to join this space
-    - **accept** — accept a request to join this space
-    - **deny** — deny a request to join this space
-    - **help** — display this message
-  `))
+  - **list** — list the pending requests to join this space
+  - **accept** — accept a request to join this space
+  - **deny** — deny a request to join this space
+  - **help** — display this message
+`))
 
 controller.hears([/^$/, 'help'], 'direct_mention', displayHelp)
 
-controller.hears(['list', 'pending', 'who', 'requests'], 'direct_mention', (bot, message) => {
+controller.hears(['list', 'pending', 'who', 'requests'], 'direct_mention', async (bot, message) => {
   console.log('LIST', message)
 
-  store.listRequests(message.channel).then( requests => {
-    console.log('requests: ', requests)
+  const requests = await store.listRequests(message.channel)
 
-    if (requests.length) {
+  console.log('requests: ', requests)
 
-      bot.reply(message, md(`
-        Here are the people waiting for invitations:
+  if (requests.length) {
 
-        ${requestList(requests)}
-      `))
+    bot.reply(message, md(`
+      Here are the people waiting for invitations:
 
-    } else {
+      ${requestList(requests)}`
+    ))
 
-      bot.reply(message, 'There are no pending requests')
+  } else {
 
-    }
-  })
+    bot.reply(message, 'There are no pending requests')
+
+  }
 })
 
-const acceptRequest = (convoOrMessage, request) => {
+const acceptRequest = async (convoOrMessage, request) => {
   say(convoOrMessage, `Inviting ${request.name} to join this space`)
   actions.invite(request)
-    .then( () => store.removeRequest(request) )
-    .catch(console.log)
+  store.removeRequest(request)
 }
 
 const denyRequest = (convoOrMessage, request) => {
-  console.log('CONVO: ', convoOrMessage)
   say(convoOrMessage, `Denying ${request.name}`)
-  store.removeRequest(request).catch(console.log)
+  store.removeRequest(request)
 }
 
 const say = (convoOrMessage, text) => {
@@ -211,20 +225,23 @@ const askWho = (message, requests, command) => {
     console.log('PATTERNS', patterns)
 
     convo.ask(
-      md(`Who?\n\n${requestList(requests)}`),
+      md(`
+        Who?
+
+        ${requestList(requests)}
+      `),
       patterns
     )
   })
 }
 
-const requireModerator = (bot, message) =>
-  actions.findMembership(message.channel, {personEmail: message.user})
-    .then( ({isModerator}) => {
-      if (!isModerator) {
-        bot.reply(message, 'Sorry, I only answer to moderators')
-        return Promise.reject()
-      }
-    })
+const requireModerator = async (bot, message) => {
+  const { isModerator } = await actions.findMembership(message.channel, {personEmail: message.user})
+
+  if (!isModerator) bot.reply(message, 'Sorry, I only answer to moderators')
+
+  return isModerator
+}
 
 const acceptCommands = ['accept', 'invite', 'allow']
 const denyCommands = ['deny', 'reject', 'disallow']
@@ -247,45 +264,45 @@ const parseAcceptOrDenyCommand = message => ({
 
 const matchRequest = (name, requests) => _.find(requests, request => request.name.toLowerCase() == name.toLowerCase())
 
-const handleAcceptOrDeny = (bot, message) => {
+const handleAcceptOrDeny = async (bot, message) => {
   console.log('ACCEPT/DENY', message)
 
-  requireModerator(bot, message).then( () => {
+  if (await requireModerator(bot, message)) {
     console.log('GOING THROUGH WITH IT')
 
-    store.listRequests(message.channel).then( requests => {
-      console.log('REQUESTS', requests)
+    const requests = await store.listRequests(message.channel)
 
-      if (requests.length === 0) {
-        console.log('NO PENDING REQUESTS', requests)
-        bot.reply(message, 'There are no pending requests')
-        return
-      }
+    console.log('REQUESTS', requests)
 
-      const { command, name } = parseAcceptOrDenyCommand(message)
+    if (requests.length === 0) {
+      console.log('NO PENDING REQUESTS', requests)
+      bot.reply(message, 'There are no pending requests')
+      return
+    }
 
-      console.log('NAME', name)
-      console.log('COMMAND', command)
+    const { command, name } = parseAcceptOrDenyCommand(message)
 
-      if (name) {
-        const request = matchRequest(name, requests)
+    console.log('NAME', name)
+    console.log('COMMAND', command)
 
-        if (request) {
-          console.log('FOUND REQUEST FOR NAME')
-          acceptOrDenyActions[command](message, request)
-        } else {
-          console.log('NO REQUEST FOR NAME')
-          bot.reply(message, `Sorry, but I couldn't find "${name}" in the list of pending invitation requests`)
-        }
-      } else if (requests.length === 1) {
-        console.log('ACCEPT/DENY ONLY REQUEST')
-        acceptOrDenyActions[command](message, requests[0])
+    if (name) {
+      const request = matchRequest(name, requests)
+
+      if (request) {
+        console.log('FOUND REQUEST FOR NAME')
+        acceptOrDenyActions[command](message, request)
       } else {
-        console.log('MULTIPLE REQUESTS / NO NAME')
-        askWho(message, requests, command)
+        console.log('NO REQUEST FOR NAME')
+        bot.reply(message, `Sorry, but I couldn't find "${name}" in the list of pending invitation requests`)
       }
-    }).catch(console.log)
-  })
+    } else if (requests.length === 1) {
+      console.log('ACCEPT/DENY ONLY REQUEST')
+      acceptOrDenyActions[command](message, requests[0])
+    } else {
+      console.log('MULTIPLE REQUESTS / NO NAME')
+      askWho(message, requests, command)
+    }
+  }
 }
 
 /*

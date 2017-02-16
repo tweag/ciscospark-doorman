@@ -31,7 +31,6 @@ export default api => {
     findMembership,
     getRoom,
     invite,
-    makeMemberModerator,
     makeUserModerator,
     stepDownAsModerator,
   }
