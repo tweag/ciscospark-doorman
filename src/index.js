@@ -1,6 +1,5 @@
 import 'babel-polyfill'
 import _ from 'lodash'
-import unindent from 'unindent'
 
 import controller from './controller'
 import webui from './webui'
