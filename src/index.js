@@ -1,5 +1,6 @@
 import 'babel-polyfill'
 import _ from 'lodash'
+import unindent from 'unindent'
 
 import controller from './controller'
 import webui from './webui'
@@ -12,23 +13,12 @@ const botEmail = process.env.BOT_EMAIL
 const actions = actionsBuilder(controller.api, botEmail)
 const store = storeBuilder(controller.storage)
 
-const undent = str => {
-  const withoutInitialLines = str.replace(/\s*\n/, '')
-  const indentation = withoutInitialLines.match(/^\s*/)[0]
-  return withoutInitialLines
-    .split(/\n/)
-    .map( s => s.replace(indentation, '') )
-    .join("\n")
-    .trim()
-}
+const u = str => unindent(str, { trim: true })
 
-const md = str => {
-  const undented = undent(str)
-  return {
-    markdown: undented,
-    text: undented, // if you don't send `text`, *sometimes* Botkit won't send the message
-  }
-}
+const md = str => ({
+  markdown: u(str),
+  text: 'if you do not send `text`, *sometimes* Botkit will not send the message'
+})
 
 controller.setupWebserver(process.env.PORT || 3000, (err, webserver) => {
   if (err) {
@@ -52,7 +42,7 @@ controller.on('bot_room_join', (bot, message) => {
   actions.makeUserModerator(message.channel, { personEmail: botEmail })
     .then( () => {
       console.log('became moderator')
-      bot.reply(message, undent(`
+      bot.reply(message, u(`
         ${welcomeText}
         I took the liberty of making myself a moderator of this space so that I can add people to it.
         To invite people to this room, give them this URL:
@@ -62,7 +52,7 @@ controller.on('bot_room_join', (bot, message) => {
     })
     .catch( err => {
       console.log('could not become moderator')
-      bot.reply(message, undent(`
+      bot.reply(message, u(`
         ${welcomeText}
         Before we get started, you need to make me a moderator. The People menu is up there ↗️
       `))
@@ -80,7 +70,7 @@ controller.on('memberships.updated', (bot, message) => {
 
     store.didAskForModeratorship(message.channel).then( asked => {
       if (asked) {
-        bot.reply(message, undent(`
+        bot.reply(message, u(`
           Wonderful! Thanks for making me a moderator. Now we can get started.
           To invite people to this room, give them this URL:
           ${urls.roomInvitation(message.channel)}
@@ -127,10 +117,10 @@ const displayHelp = (bot, message) =>
 
     Things I can do:
 
-    - list — list the pending requests to join this space
-    - accept — accept a request to join this space
-    - deny — deny a request to join this space
-    - help — display this message
+    - **list** — list the pending requests to join this space
+    - **accept** — accept a request to join this space
+    - **deny** — deny a request to join this space
+    - **help** — display this message
   `))
 
 controller.hears([/^$/, 'help'], 'direct_mention', displayHelp)
@@ -221,11 +211,7 @@ const askWho = (message, requests, command) => {
     console.log('PATTERNS', patterns)
 
     convo.ask(
-      md(`
-        Who?
-
-        ${requestList(requests)}
-      `),
+      md(`Who?\n\n${requestList(requests)}`),
       patterns
     )
   })

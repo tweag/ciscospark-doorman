@@ -51,7 +51,8 @@
     "main-bower-files": "^2.13.1",
     "node-sass": "^4.5.0",
     "promisify-node": "^0.4.0",
-    "pug": "^2.0.0-beta11"
+    "pug": "^2.0.0-beta11",
+    "unindent": "^2.0.0"
   },
   "ava": {
     "files": [
