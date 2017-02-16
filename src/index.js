@@ -1,4 +1,6 @@
 import 'babel-polyfill'
+import _ from 'lodash'
+
 import controller from './controller'
 import webui from './webui'
 import actionsBuilder from './actions'
@@ -159,12 +161,13 @@ const acceptRequest = (convoOrMessage, request) => {
   say(convoOrMessage, `Inviting ${request.name} to join this space`)
   actions.invite(request)
     .then( () => store.removeRequest(request) )
+    .catch(console.log)
 }
 
 const denyRequest = (convoOrMessage, request) => {
   console.log('CONVO: ', convoOrMessage)
   say(convoOrMessage, `Denying ${request.name}`)
-  store.removeRequest(request)
+  store.removeRequest(request).catch(console.log)
 }
 
 const say = (convoOrMessage, text) => {
@@ -177,27 +180,45 @@ const say = (convoOrMessage, text) => {
 
 const requestList = (requests) => requests.map( ({name}) => `1. ${name}` ).join("\n")
 
-const askWho = (message, requests, actionToTake) => {
+const acceptOrDenyActions = {
+  accept: acceptRequest,
+  deny: denyRequest,
+}
+
+const askWho = (message, requests, command) => {
   bot.startConversation(message, (err, convo) => {
+
     const patterns = [
-      ...requests.map( (request) => ({
-        pattern: request.name,
+      {
+        pattern: acceptOrDenyCommandMatcher,
         callback: (response, convo) => {
-          actionToTake(convo, request)
+          console.log('ABORT AND RETRY ACCEPT/DENY')
+          controller.trigger('direct_mention', [bot, response])
+
+          convo.stop()
           convo.next()
         }
-      })),
-
+      },
       {
-        pattern: /.*/,
+        pattern: /(\S+)\s+(.+)/,
         callback: (response, convo) => {
-          console.log('did not understand', response)
-          convo.say("I didn't catch that")
-          convo.repeat()
+          console.log('MATCH', response.match)
+          const request = matchRequest(response.match[2], requests)
+
+          if (request) {
+            acceptOrDenyActions[command](message, request)
+          } else {
+            console.log('did not understand', response)
+            convo.say("Sorry, I didn't catch that. What do you want me to do?")
+          }
+
+          convo.stop()
           convo.next()
         },
       },
     ]
+
+    console.log('PATTERNS', patterns)
 
     convo.ask(
       md(`
@@ -210,11 +231,6 @@ const askWho = (message, requests, actionToTake) => {
   })
 }
 
-const acceptOrDenyAction = {
-  accept: acceptRequest,
-  deny: denyRequest,
-}
-
 const requireModerator = (bot, message) =>
   actions.findMembership(message.channel, {personEmail: message.user})
     .then( ({isModerator}) => {
@@ -224,25 +240,74 @@ const requireModerator = (bot, message) =>
       }
     })
 
-controller.hears(['accept', 'deny'], 'direct_mention', (bot, message) => {
+const acceptCommands = ['accept', 'invite', 'allow']
+const denyCommands = ['deny', 'reject', 'disallow']
+
+const actualCommand = (writtenCommand) => {
+  const command = writtenCommand.toLowerCase()
+  if (_.includes(acceptCommands, command)) {
+    return 'accept'
+  } else if (_.includes(denyCommands, command)) {
+    return 'deny'
+  } else {
+    throw "Should never get here"
+  }
+}
+
+const parseAcceptOrDenyCommand = (message) => ({
+  command: actualCommand(message.match[1]),
+  name: message.match[3],
+})
+
+const matchRequest = (name, requests) => _.find(requests, (request) => request.name.toLowerCase() == name.toLowerCase())
+
+const handleAcceptOrDeny = (bot, message) => {
   console.log('ACCEPT/DENY', message)
 
   requireModerator(bot, message).then( () => {
     console.log('GOING THROUGH WITH IT')
 
-    const actionToTake = acceptOrDenyAction[message.match[0]]
-
     store.listRequests(message.channel).then( (requests) => {
-      if (requests.length === 0) {
-        bot.reply(message, 'There are no pending requests')
-      } else if (requests.length === 1) {
-        actionToTake(message, requests[0])
-      } else {
-        askWho(message, requests, actionToTake)
-      }
-    })
-  })
-})
+      console.log('REQUESTS', requests)
 
+      if (requests.length === 0) {
+        console.log('NO PENDING REQUESTS', requests)
+        bot.reply(message, 'There are no pending requests')
+        return
+      }
+
+      const { command, name } = parseAcceptOrDenyCommand(message)
+
+      console.log('NAME', name)
+      console.log('COMMAND', command)
+
+      if (name) {
+        const request = matchRequest(name, requests)
+
+        if (request) {
+          console.log('FOUND REQUEST FOR NAME')
+          acceptOrDenyActions[command](message, request)
+        } else {
+          console.log('NO REQUEST FOR NAME')
+          bot.reply(message, `Sorry, but I couldn't find "${name}" in the list of pending invitation requests`)
+        }
+      } else if (requests.length === 1) {
+        console.log('ACCEPT/DENY ONLY REQUEST')
+        acceptOrDenyActions[command](message, requests[0])
+      } else {
+        console.log('MULTIPLE REQUESTS / NO NAME')
+        askWho(message, requests, command)
+      }
+    }).catch(console.log)
+  })
+}
+
+/*
+  Matches commands for accepting/denying
+*/
+const regexpStr = `(${[...acceptCommands, ...denyCommands].join('|')})(\\s+(.+))?`
+const acceptOrDenyCommandMatcher = new RegExp(regexpStr)
+
+controller.hears([acceptOrDenyCommandMatcher], 'direct_mention', handleAcceptOrDeny)
 
 controller.on('direct_mention', displayHelp)
