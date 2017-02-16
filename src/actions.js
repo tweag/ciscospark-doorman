@@ -5,7 +5,7 @@ export default api => {
     )
 
   const findMembership = (roomId, userParams) =>
-    api.memberships.list({...userParams, roomId, max: 1})
+    api.memberships.list({...userParams, roomId})
       .then( ([membership, ...rest]) => {
         if (rest.length) {
           console.log("found other memberships: ", rest)
