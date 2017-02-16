@@ -1,28 +1,34 @@
 export default api => {
-  const makeMemberModerator = (membershipId, isModerator) =>
-    api.memberships.get(membershipId).then( membership =>
-      api.memberships.update({ ...membership, isModerator })
-    )
+  const makeMemberModerator = async (membershipId, isModerator) => {
+    const membership = await api.memberships.get(membershipId)
+    await api.memberships.update({ ...membership, isModerator })
+  }
 
-  const findMembership = (roomId, userParams) =>
-    api.memberships.list({...userParams, roomId})
-      .then( ([membership, ...rest]) => {
-        if (rest.length) {
-          console.log("found other memberships: ", rest)
-          throw new Error(`Found other memberships with the same params: ${JSON.stringify(rest)}`)
-        }
+  const findMembership = async (roomId, userParams) => {
+    const [membership, ...rest] = await api.memberships.list({...userParams, roomId})
 
-        return membership
-      })
+    if (rest.length) {
+      console.log("found other memberships: ", rest)
+      throw new Error(`Found other memberships with the same params: ${JSON.stringify(rest)}`)
+    }
 
-  const makeUserModerator = (roomId, userParams) =>
-    findMembership(roomId, userParams).then( ({id}) => makeMemberModerator(id, true) )
+    return membership
+  }
 
-  const stepDownAsModerator = (roomId, personEmail) =>
-    findMembership(roomId, {personEmail}).then( ({id}) => makeMemberModerator(id, false) )
+  const makeUserModerator = async (roomId, userParams) => {
+    const {id} = await findMembership(roomId, userParams)
+    await makeMemberModerator(id, true)
+  }
 
-  const getRoom = id =>
-    api.rooms.list({ id, max: 1 }).then( ([room, ..._]) => room )
+  const stepDownAsModerator = async (roomId, personEmail) => {
+    const {id} = await findMembership(roomId, {personEmail})
+    await makeMemberModerator(id, false)
+  }
+
+  const getRoom = async id => {
+    const [room] = await api.rooms.list({ id, max: 1 })
+    return room
+  }
 
   const invite = ({roomId, email}) =>
     api.memberships.create({ roomId, personEmail: email })
