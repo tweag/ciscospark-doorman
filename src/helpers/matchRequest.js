@@ -12,5 +12,12 @@ const namesMatch = (input, requestName) =>
 const appendNumber = (requests) =>
   requests.map( ({...data}, i) => ({...data, number: i + 1}) )
 
-export default (name, requests) =>
-  _.filter(appendNumber(requests), request => namesMatch(name, request.name))
+const parseNumber = (input) => {
+  const normalized = input.replace(/([\s]|[^a-zA-Z0-9])/g, '')
+  return normalized.match(/^\d+$/) && parseInt(normalized)
+}
+
+export default (input, requests) => {
+  const number = parseNumber(input)
+  return _.filter(appendNumber(requests), request => number === request.number || namesMatch(input, request.name))
+}

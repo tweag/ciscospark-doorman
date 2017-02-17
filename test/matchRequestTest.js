@@ -43,6 +43,22 @@ test('returns nothing when it cannot find the request', matchRequestsWithName,
   'Eric Erlich', []
 )
 
+test('matches number - exact string', matchRequestsWithName,
+  '2', ['Bob Barker']
+)
+
+test('matches number - with octothorpe', matchRequestsWithName,
+  '#2', ['Bob Barker']
+)
+
+test('matches number - with period', matchRequestsWithName,
+  '2.', ['Bob Barker']
+)
+
+test('matches number - with whitespace and other non-alpha chars', matchRequestsWithName,
+  '!@$*)#$% 2 )(&*$', ['Bob Barker']
+)
+
 test('appends the number of the request so we can use it in other places', t => {
   const matches = matchRequest('Bob', t.context.requests)
   const namesAndNumbers = matches.map( ({name, number}) => [name, number] )
