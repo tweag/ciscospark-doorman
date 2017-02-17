@@ -1,5 +1,5 @@
 import 'babel-polyfill'
-import _ from 'lodash'
+import includes from 'lodash/includes'
 
 import controller from './controller'
 import webui from './webui'
@@ -254,9 +254,9 @@ const denyCommands = ['deny', 'reject', 'disallow']
 
 const actualCommand = writtenCommand => {
   const command = writtenCommand.toLowerCase()
-  if (_.includes(acceptCommands, command)) {
+  if (includes(acceptCommands, command)) {
     return 'accept'
-  } else if (_.includes(denyCommands, command)) {
+  } else if (includes(denyCommands, command)) {
     return 'deny'
   } else {
     throw "Should never get here"

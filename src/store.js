@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import reject from 'lodash/reject'
 import promisify from 'promisify-node'
 import uuid from 'node-uuid'
 
@@ -24,7 +24,7 @@ export default storage => {
 
   const removeRequest = request =>
     updateRequests(request.roomId, requests =>
-      _.reject(requests, ({uuid}) => uuid == request.uuid)
+      reject(requests, ({uuid}) => uuid == request.uuid)
     )
 
   const updateRequests = (roomId, cb) =>

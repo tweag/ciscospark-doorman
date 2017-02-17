@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import filter from 'lodash/filter'
 
 // 'Bob   Barker   ' => ' bob barker '
 // adds space to ends so that we can use indexOf without 'ana' matching 'dana'
@@ -19,5 +19,5 @@ const parseNumber = (input) => {
 
 export default (input, requests) => {
   const number = parseNumber(input)
-  return _.filter(appendNumber(requests), request => number === request.number || namesMatch(input, request.name))
+  return filter(appendNumber(requests), request => number === request.number || namesMatch(input, request.name))
 }

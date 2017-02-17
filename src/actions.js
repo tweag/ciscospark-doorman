@@ -1,5 +1,3 @@
-import _ from 'lodash'
-
 import flow from 'lodash/fp/flow'
 import filter from 'lodash/fp/filter'
 import reject from 'lodash/fp/reject'
