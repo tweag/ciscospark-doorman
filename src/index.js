@@ -247,6 +247,9 @@ const askWho = (message, requests, command) => {
 }
 
 const requireModerator = async (bot, message) => {
+  // if there are no other moderators, anyone is allowed to use Doorman
+  if (! await actions.anyOtherModerators(message.channel, botEmail)) return true
+
   const { isModerator } = await actions.findMembership(message.channel, {personEmail: message.user})
 
   if (!isModerator) bot.reply(message, 'Sorry, I only answer to moderators')
@@ -315,5 +318,6 @@ const regexpStr = `(${[...acceptCommands, ...denyCommands].join('|')})(\\s+(.+))
 const acceptOrDenyCommandMatcher = new RegExp(regexpStr)
 
 controller.hears([acceptOrDenyCommandMatcher], 'direct_mention', (...args) => handleAcceptOrDeny(...args).catch(console.log))
+
 
 controller.on('direct_mention', displayHelp)

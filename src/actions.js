@@ -1,3 +1,9 @@
+import _ from 'lodash'
+
+import flow from 'lodash/fp/flow'
+import filter from 'lodash/fp/filter'
+import reject from 'lodash/fp/reject'
+
 export default api => {
   const makeMemberModerator = async (membershipId, isModerator) => {
     const membership = await api.memberships.get(membershipId)
@@ -33,10 +39,24 @@ export default api => {
   const invite = ({roomId, email}) =>
     api.memberships.create({ roomId, personEmail: email })
 
+  const findOtherModerators = async (roomId, personEmail) => {
+    // use spread to make it an actual Array
+    const [...memberships] = await api.memberships.list({roomId})
+    return flow(
+      filter({ isModerator: true }),
+      reject({ personEmail }),
+    )(memberships)
+  }
+
+  const anyOtherModerators = (...args) =>
+    findOtherModerators(...args).then( otherMods => !!otherMods.length )
+
   return {
     findMembership,
     getRoom,
     invite,
+
+    anyOtherModerators,
     makeUserModerator,
     stepDownAsModerator,
   }
