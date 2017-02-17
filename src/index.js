@@ -7,21 +7,13 @@ import actionsBuilder from './actions'
 import storeBuilder from './store'
 import matchRequest from './helpers/matchRequest'
 import orText from './helpers/orText'
+import u from './helpers/unindent'
 
 const bot = controller.spawn({})
 const urls = webui.urls(process.env.PUBLIC_ADDRESS) // TODO: grab this from controller.config
 const botEmail = process.env.BOT_EMAIL
 const actions = actionsBuilder(controller.api, botEmail)
 const store = storeBuilder(controller.storage)
-
-const u = str =>
-  str
-    .split("\n")
-    .map( (s) =>
-      s.replace(/^\s+/, '')
-    )
-    .join("\n")
-    .trim()
 
 const md = str => ({
   markdown: u(str),
