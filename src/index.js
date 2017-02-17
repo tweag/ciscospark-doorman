@@ -5,6 +5,8 @@ import controller from './controller'
 import webui from './webui'
 import actionsBuilder from './actions'
 import storeBuilder from './store'
+import matchRequest from './helpers/matchRequest'
+import orText from './helpers/orText'
 
 const bot = controller.spawn({})
 const urls = webui.urls(process.env.PUBLIC_ADDRESS) // TODO: grab this from controller.config
@@ -188,6 +190,21 @@ const acceptOrDenyActions = {
   deny: denyRequest,
 }
 
+const acceptOrDenyBasedOnName = (bot, message, requests, command, name) => {
+  const matched = matchRequest(name, requests)
+
+  if (matched.length === 1) {
+    console.log('FOUND REQUEST FOR NAME')
+    acceptOrDenyActions[command](message, matched[0])
+  } else if (matched.length > 1) {
+    console.log('FOUND REQUEST FOR MULTIPLE NAMES')
+    bot.reply(message, `Sorry, but "${name}" could be either ${orNames(matched)}. Can you be more specific?`)
+  } else {
+    console.log('NO REQUEST FOR NAME')
+    bot.reply(message, `Sorry, but I couldn't find "${name}" in the list of pending invitation requests`)
+  }
+}
+
 const askWho = (message, requests, command) => {
   bot.startConversation(message, (err, convo) => {
 
@@ -206,14 +223,9 @@ const askWho = (message, requests, command) => {
         pattern: /(\S+)\s+(.+)/,
         callback: (response, convo) => {
           console.log('MATCH', response.match)
-          const request = matchRequest(response.match[2], requests)
+          const name = response.match[2]
 
-          if (request) {
-            acceptOrDenyActions[command](message, request)
-          } else {
-            console.log('did not understand', response)
-            convo.say("Sorry, I didn't catch that. What do you want me to do?")
-          }
+          acceptOrDenyBasedOnName(bot, message, requests, command, name)
 
           convo.stop()
           convo.next()
@@ -261,7 +273,7 @@ const parseAcceptOrDenyCommand = message => ({
   name: message.match[3],
 })
 
-const matchRequest = (name, requests) => _.find(requests, request => request.name.toLowerCase() == name.toLowerCase())
+const orNames = (requests) => orText(requests.map(({name, number}) => `"${name}" (#${number})`))
 
 const handleAcceptOrDeny = async (bot, message) => {
   console.log('ACCEPT/DENY', message)
@@ -285,15 +297,7 @@ const handleAcceptOrDeny = async (bot, message) => {
     console.log('COMMAND', command)
 
     if (name) {
-      const request = matchRequest(name, requests)
-
-      if (request) {
-        console.log('FOUND REQUEST FOR NAME')
-        acceptOrDenyActions[command](message, request)
-      } else {
-        console.log('NO REQUEST FOR NAME')
-        bot.reply(message, `Sorry, but I couldn't find "${name}" in the list of pending invitation requests`)
-      }
+      acceptOrDenyBasedOnName(bot, message, requests, command, name)
     } else if (requests.length === 1) {
       console.log('ACCEPT/DENY ONLY REQUEST')
       acceptOrDenyActions[command](message, requests[0])
@@ -310,6 +314,6 @@ const handleAcceptOrDeny = async (bot, message) => {
 const regexpStr = `(${[...acceptCommands, ...denyCommands].join('|')})(\\s+(.+))?`
 const acceptOrDenyCommandMatcher = new RegExp(regexpStr)
 
-controller.hears([acceptOrDenyCommandMatcher], 'direct_mention', handleAcceptOrDeny)
+controller.hears([acceptOrDenyCommandMatcher], 'direct_mention', (...args) => handleAcceptOrDeny(...args).catch(console.log))
 
 controller.on('direct_mention', displayHelp)
