@@ -1,6 +1,6 @@
 import test from 'ava'
 
-import matchRequest from '../src/helpers/matchRequest'
+import matchRequest from '../../src/util/matchRequest'
 
 test.beforeEach( t => {
   t.context.requests = [

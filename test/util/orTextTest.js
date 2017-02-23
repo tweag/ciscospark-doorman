@@ -1,6 +1,6 @@
 import test from 'ava'
 
-import orText from '../src/helpers/orText'
+import orText from '../../src/util/orText'
 
 const expectOrText = (t, input, expected) =>
   t.true( orText(input) === expected )

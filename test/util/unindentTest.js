@@ -1,6 +1,6 @@
 import test from 'ava'
 
-import unindent from '../src/helpers/unindent'
+import unindent from '../../src/util/unindent'
 
 test('removes surrounding whitespace for each line of a string', t => {
   const input = [

@@ -5,9 +5,9 @@ import controller from './controller'
 import webui from './webui'
 import actionsBuilder from './actions'
 import storeBuilder from './store'
-import matchRequest from './helpers/matchRequest'
-import orText from './helpers/orText'
-import u from './helpers/unindent'
+import matchRequest from './util/matchRequest'
+import orText from './util/orText'
+import u from './util/unindent'
 
 const bot = controller.spawn({})
 const urls = webui.urls(process.env.PUBLIC_ADDRESS) // TODO: grab this from controller.config
