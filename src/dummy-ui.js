@@ -3,7 +3,7 @@ import express from 'express'
 import webui from './webui'
 import storeBuilder from './store'
 
-const store = storeBuilder()
+const store = storeBuilder({ channels: {} })
 
 const dummyActions = {
   getRoom: () => Promise.resolve({ title: "Movers & Shakers" })

@@ -1,12 +1,5 @@
 const gulp = require('gulp');
 const $    = require('gulp-load-plugins')();
-const mainBowerFiles = require('main-bower-files');
-
-gulp.task('bower', function() {
-  return gulp
-    .src(mainBowerFiles({ filter: /\.js$/ }))
-    .pipe(gulp.dest('public/javascripts'))
-});
 
 const imagesDir = 'src/images';
 
@@ -25,10 +18,11 @@ const stylesheetsDir = 'src/stylesheets';
 
 gulp.task('sass', function() {
   return gulp.src(`${stylesheetsDir}/index.s*ss`)
-    .pipe($.sass({
-      includePaths: sassPaths,
-      outputStyle: 'compressed' // if css compressed **file size**
-    })
+    .pipe(
+      $.sass({
+        includePaths: sassPaths,
+        outputStyle: 'compressed' // if css compressed **file size**
+      })
       .on('error', $.sass.logError))
     .pipe($.autoprefixer({
       browsers: ['last 2 versions', 'ie >= 9']
@@ -40,17 +34,6 @@ gulp.task('watch-sass', ['sass'], function() {
   return gulp.watch([`${stylesheetsDir}/**/*.scss`], ['sass']);
 });
 
-gulp.task('watch-js', ['js'], function() {
-  return gulp.watch([`${javascriptsDir}/**/*.js`], ['js']);
-});
+gulp.task('build', ['images', 'sass']);
 
-const javascriptsDir = 'src/javascripts';
-
-gulp.task('js', function() {
-  return gulp.src(`${javascriptsDir}/**/*.js`)
-    .pipe(gulp.dest('public/javascripts'));
-});
-
-gulp.task('build', ['images', 'sass', 'bower', 'js']);
-
-gulp.task('default', ['build', 'watch-sass', 'watch-js']);
+gulp.task('default', ['build', 'watch-sass']);
