@@ -29,6 +29,9 @@ export default api => {
     await makeMemberModerator(id, false)
   }
 
+  const leaveRoom = (roomId, personEmail) =>
+    findMembership(roomId, {personEmail}).then( (membership) => api.memberships.remove(membership) )
+
   const getRoom = async id => {
     const [room] = await api.rooms.list({ id, max: 1 })
     return room
@@ -53,6 +56,7 @@ export default api => {
     findMembership,
     getRoom,
     invite,
+    leaveRoom,
 
     anyOtherModerators,
     makeUserModerator,

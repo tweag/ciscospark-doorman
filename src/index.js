@@ -129,6 +129,7 @@ const displayHelp = (bot, message) => bot.reply(message, md(`
   - **list** — list the pending requests to join this space
   - **accept** — accept a request to join this space
   - **deny** — deny a request to join this space
+  - **leave** — tell Doorman to leave the space
   - **help** — display this message
 `))
 
@@ -155,6 +156,22 @@ controller.hears(['list', 'pending', 'who', 'requests'], 'direct_mention', async
 
   }
 })
+
+
+controller.hears(['leave'], 'direct_mention', async (bot, message) => {
+  console.log('LEAVE', message)
+  if (await requireModerator(bot, message)) {
+    bot.reply(message, 'Goodbye')
+
+    actions.leaveRoom(message.channel, botEmail)
+      .catch( (err) => {
+        console.log(err)
+        bot.reply(message, `Apparently, I am unable. Try again or ask someone for help. \n\n${err.stack}`)
+      })
+  }
+})
+
+
 
 const acceptRequest = async (convoOrMessage, request) => {
   say(convoOrMessage, `Inviting ${request.name} to join this space`)

@@ -1,6 +1,6 @@
 import reject from 'lodash/reject'
-import promisify from 'promisify-node'
 import uuid from 'node-uuid'
+import promisify from 'promisify-node'
 
 export default storage => {
   const channels = promisify(storage.channels)
