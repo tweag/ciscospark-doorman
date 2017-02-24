@@ -34,8 +34,6 @@ controller.setupWebserver(process.env.PORT || 3000, (err, webserver) => {
 const api = controller.api
 
 controller.on('bot_room_join', async (bot, message) => {
-  console.log('bot_room_join', message)
-
   const welcomeText =
     "Hi! I'm Doorman. I can help you invite users by giving them a URL where they can request access to this room."
 
@@ -44,7 +42,6 @@ controller.on('bot_room_join', async (bot, message) => {
   try {
     await actions.makeUserModerator(message.channel, { personEmail: botEmail })
 
-    console.log('became moderator')
     bot.reply(message, u(`
       ${welcomeText}
       I took the liberty of making myself a moderator of this space so that I can add people to it.
@@ -56,7 +53,6 @@ controller.on('bot_room_join', async (bot, message) => {
 
   } catch (e) {
 
-    console.log('could not become moderator')
     bot.reply(message, u(`
       ${welcomeText}
       Before we get started, you need to make me a moderator. The People menu is up there ↗️
@@ -70,8 +66,6 @@ controller.on('bot_room_join', async (bot, message) => {
 
 
 controller.on('memberships.updated', async (bot, message) => {
-  console.log('memberships.updated', message)
-
   const { isModerator, personEmail } = message.original_message.data
 
   if (isModerator
@@ -90,36 +84,17 @@ controller.on('memberships.updated', async (bot, message) => {
 })
 
 
-controller.hears(['make me moderator'], 'direct_mention', async (bot, message) => {
-  try {
-    await actions.makeUserModerator(message.channel, { personId: message.original_message.personId })
-    bot.reply(message, 'done')
-  } catch (err) {
-    console.log(err)
-    bot.reply(message, 'Sorry... I was unable to make you moderator.')
-  }
-})
-
-controller.hears(['make yourself moderator'], 'direct_mention', async (bot, message) => {
-  try {
-    await actions.makeUserModerator(message.channel, { personEmail: botEmail })
-  } catch (err) {
-    console.log(err)
-    bot.reply(message, 'Sorry... I was unable to make myself moderator.')
-  }
-})
-
-
-controller.hears(['step down'], 'direct_mention', async (bot, message) => {
-  console.log('STEP DOWN', message)
-  bot.reply(message, 'Stepping down')
-
-  try {
-    await actions.stepDownAsModerator(message.channel, botEmail)
-  } catch (err) {
-    bot.reply(message, 'Apparently, I am unable.')
-  }
-})
+if (process.env.ALLOW_DEBUG_COMMANDS === '1') {
+  controller.hears(['make me moderator'], 'direct_mention', async (bot, message) => {
+    try {
+      await actions.makeUserModerator(message.channel, { personId: message.original_message.personId })
+      bot.reply(message, 'done')
+    } catch (err) {
+      console.log(err)
+      bot.reply(message, 'Sorry... I was unable to make you moderator.')
+    }
+  })
+}
 
 const displayHelp = (bot, message) => bot.reply(message, md(`
   Send people here to get an invitation: ${urls.roomInvitation(message.channel)}
@@ -136,11 +111,7 @@ const displayHelp = (bot, message) => bot.reply(message, md(`
 controller.hears([/^$/, 'help'], 'direct_mention', displayHelp)
 
 controller.hears(['list', 'pending', 'who', 'requests'], 'direct_mention', async (bot, message) => {
-  console.log('LIST', message)
-
   const requests = await store.listRequests(message.channel)
-
-  console.log('requests: ', requests)
 
   if (requests.length) {
 
@@ -159,7 +130,6 @@ controller.hears(['list', 'pending', 'who', 'requests'], 'direct_mention', async
 
 
 controller.hears(['leave'], 'direct_mention', async (bot, message) => {
-  console.log('LEAVE', message)
   if (await requireModerator(bot, message)) {
     bot.reply(message, 'Goodbye')
 
@@ -203,13 +173,10 @@ const acceptOrDenyBasedOnName = (bot, message, requests, command, name) => {
   const matched = matchRequest(name, requests)
 
   if (matched.length === 1) {
-    console.log('FOUND REQUEST FOR NAME')
     acceptOrDenyActions[command](message, matched[0])
   } else if (matched.length > 1) {
-    console.log('FOUND REQUEST FOR MULTIPLE NAMES')
     bot.reply(message, `Sorry, but "${name}" could be either ${orNames(matched)}. Can you be more specific?`)
   } else {
-    console.log('NO REQUEST FOR NAME')
     bot.reply(message, `Sorry, but I couldn't find "${name}" in the list of pending invitation requests`)
   }
 }
@@ -221,7 +188,6 @@ const askWho = (message, requests, command) => {
       {
         pattern: acceptOrDenyCommandMatcher,
         callback: (response, convo) => {
-          console.log('ABORT AND RETRY ACCEPT/DENY')
           controller.trigger('direct_mention', [bot, response])
 
           convo.stop()
@@ -231,7 +197,6 @@ const askWho = (message, requests, command) => {
       {
         pattern: /(\S+)\s+(.+)/,
         callback: (response, convo) => {
-          console.log('MATCH', response.match)
           const name = response.match[2]
 
           acceptOrDenyBasedOnName(bot, message, requests, command, name)
@@ -241,8 +206,6 @@ const askWho = (message, requests, command) => {
         },
       },
     ]
-
-    console.log('PATTERNS', patterns)
 
     convo.ask(
       md(`
@@ -287,46 +250,36 @@ const parseAcceptOrDenyCommand = message => ({
 
 const orNames = (requests) => orText(requests.map(({name, number}) => `"${name}" (#${number})`))
 
-const handleAcceptOrDeny = async (bot, message) => {
-  console.log('ACCEPT/DENY', message)
-
-  if (await requireModerator(bot, message)) {
-    console.log('GOING THROUGH WITH IT')
-
-    const requests = await store.listRequests(message.channel)
-
-    console.log('REQUESTS', requests)
-
-    if (requests.length === 0) {
-      console.log('NO PENDING REQUESTS', requests)
-      bot.reply(message, 'There are no pending requests')
-      return
-    }
-
-    const { command, name } = parseAcceptOrDenyCommand(message)
-
-    console.log('NAME', name)
-    console.log('COMMAND', command)
-
-    if (name) {
-      acceptOrDenyBasedOnName(bot, message, requests, command, name)
-    } else if (requests.length === 1) {
-      console.log('ACCEPT/DENY ONLY REQUEST')
-      acceptOrDenyActions[command](message, requests[0])
-    } else {
-      console.log('MULTIPLE REQUESTS / NO NAME')
-      askWho(message, requests, command)
-    }
-  }
-}
-
 /*
   Matches commands for accepting/denying
 */
 const regexpStr = `(${[...acceptCommands, ...denyCommands].join('|')})(\\s+(.+))?`
 const acceptOrDenyCommandMatcher = new RegExp(regexpStr)
 
-controller.hears([acceptOrDenyCommandMatcher], 'direct_mention', (...args) => handleAcceptOrDeny(...args).catch(console.log))
+controller.hears([acceptOrDenyCommandMatcher], 'direct_mention', async (bot, message) => {
+  try {
+    if (await requireModerator(bot, message)) {
+      const requests = await store.listRequests(message.channel)
+
+      if (requests.length === 0) {
+        bot.reply(message, 'There are no pending requests')
+        return
+      }
+
+      const { command, name } = parseAcceptOrDenyCommand(message)
+
+      if (name) {
+        acceptOrDenyBasedOnName(bot, message, requests, command, name)
+      } else if (requests.length === 1) {
+        acceptOrDenyActions[command](message, requests[0])
+      } else {
+        askWho(message, requests, command)
+      }
+    }
+  } catch (err) {
+    console.log(err)
+  }
+})
 
 
 controller.on('direct_mention', displayHelp)

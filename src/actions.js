@@ -8,25 +8,12 @@ export default api => {
     await api.memberships.update({ ...membership, isModerator })
   }
 
-  const findMembership = async (roomId, userParams) => {
-    const [membership, ...rest] = await api.memberships.list({...userParams, roomId})
-
-    if (rest.length) {
-      console.log("found other memberships: ", rest)
-      throw new Error(`Found other memberships with the same params: ${JSON.stringify(rest)}`)
-    }
-
-    return membership
-  }
+  const findMembership = (roomId, userParams) =>
+    api.memberships.list({...userParams, roomId}).then( ([membership]) => membership )
 
   const makeUserModerator = async (roomId, userParams) => {
     const {id} = await findMembership(roomId, userParams)
     await makeMemberModerator(id, true)
-  }
-
-  const stepDownAsModerator = async (roomId, personEmail) => {
-    const {id} = await findMembership(roomId, {personEmail})
-    await makeMemberModerator(id, false)
   }
 
   const leaveRoom = (roomId, personEmail) =>
@@ -60,6 +47,5 @@ export default api => {
 
     anyOtherModerators,
     makeUserModerator,
-    stepDownAsModerator,
   }
 }

@@ -29,7 +29,6 @@ const setupApp = (app, actions, store, bot) => {
     const { params: { roomId } } = req
 
     const membershipRequest = req.body
-    console.log(membershipRequest)
     store.addRequest(roomId, membershipRequest)
 
     const { name, title, city, email } = membershipRequest

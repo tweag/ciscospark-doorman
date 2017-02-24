@@ -1,7 +1,7 @@
 import filter from 'lodash/filter'
 
 // 'Bob   Barker   ' => ' bob barker '
-// adds space to ends so that we can use indexOf without 'ana' matching 'dana'
+// adds space to both ends so that we can use indexOf without 'ana' matching 'dana'
 const normalizeName = name => ` ${name} `.toLowerCase().replace(/\s+/g, ' ')
 
 const nameContains = (input, requestName) => requestName.indexOf(input) !== -1
