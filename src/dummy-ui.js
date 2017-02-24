@@ -6,7 +6,7 @@ import inMemoryStore from '../test/_inMemoryStore'
 
 const store = new Store(inMemoryStore())
 
-const dummyActions = {
+const dummySpark = {
   getRoom: async () => ({ title: "Movers & Shakers" })
 }
 
@@ -16,7 +16,7 @@ const dummyBot = {
 
 const app = express()
 
-webui.setupApp(app, dummyActions, store, dummyBot)
+webui.setupApp(app, dummySpark, store, dummyBot)
 
 app.get('/', (req, res) => res.send(`
   <a href="/space/dummySpaceId-1234567890">

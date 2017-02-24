@@ -8,17 +8,13 @@ import Store from './Store'
 import matchRequest from './util/matchRequest'
 import orText from './util/orText'
 import u from './util/unindent'
+import md from './util/markdownMessage'
 
 const bot = controller.spawn({})
 const urls = webui.urls(process.env.PUBLIC_ADDRESS) // TODO: grab this from controller.config
 const botEmail = process.env.BOT_EMAIL
 const spark = new Spark(controller.api)
 const store = new Store(controller.storage)
-
-const md = str => ({
-  markdown: u(str),
-  text: 'if you do not send `text`, *sometimes* Botkit will not send the message'
-})
 
 controller.setupWebserver(process.env.PORT || 3000, (err, webserver) => {
   if (err) {
