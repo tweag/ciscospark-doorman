@@ -26,11 +26,13 @@ Here are instructions for deploying on Heroku, but this can be adapted to any ho
 
         heroku config:add PUBLIC_ADDRESS=https://my-doorman-bot.herokuapp.com
 
-5. Push to heroku
+5. Add a Redis addon. The `Heroku Redis` is a good one.
+
+6. Push to heroku
 
         git push heroku
 
-6. Add your bot to your space. He'll tell you what to do from there.
+7. Add your bot to your space. He'll tell you what to do from there.
 
 ## Development
 
