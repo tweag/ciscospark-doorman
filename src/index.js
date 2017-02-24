@@ -3,7 +3,7 @@ import includes from 'lodash/includes'
 
 import controller from './controller'
 import webui from './webui'
-import Actions from './Actions'
+import Spark from './Spark'
 import Store from './Store'
 import matchRequest from './util/matchRequest'
 import orText from './util/orText'
@@ -12,7 +12,7 @@ import u from './util/unindent'
 const bot = controller.spawn({})
 const urls = webui.urls(process.env.PUBLIC_ADDRESS) // TODO: grab this from controller.config
 const botEmail = process.env.BOT_EMAIL
-const actions = new Actions(controller.api)
+const spark = new Spark(controller.api)
 const store = new Store(controller.storage)
 
 const md = str => ({
@@ -28,7 +28,7 @@ controller.setupWebserver(process.env.PORT || 3000, (err, webserver) => {
 
   controller.createWebhookEndpoints(webserver, bot, () => console.log('SPARK: Webhooks set up!'))
 
-  webui.setupApp(webserver, actions, store, bot)
+  webui.setupApp(webserver, spark, store, bot)
 })
 
 const api = controller.api
@@ -40,7 +40,7 @@ controller.on('bot_room_join', async (bot, message) => {
   let askedForModeratorship
 
   try {
-    await actions.makeUserModerator(message.channel, { personEmail: botEmail })
+    await spark.makeUserModerator(message.channel, { personEmail: botEmail })
 
     bot.reply(message, u(`
       ${welcomeText}
@@ -87,7 +87,7 @@ controller.on('memberships.updated', async (bot, message) => {
 if (process.env.ALLOW_DEBUG_COMMANDS === '1') {
   controller.hears(['make me moderator'], 'direct_mention', async (bot, message) => {
     try {
-      await actions.makeUserModerator(message.channel, { personId: message.original_message.personId })
+      await spark.makeUserModerator(message.channel, { personId: message.original_message.personId })
       bot.reply(message, 'done')
     } catch (err) {
       console.log(err)
@@ -133,7 +133,7 @@ controller.hears(['leave'], 'direct_mention', async (bot, message) => {
   if (await requireModerator(bot, message)) {
     bot.reply(message, 'Goodbye')
 
-    actions.leaveRoom(message.channel, botEmail)
+    spark.leaveRoom(message.channel, botEmail)
       .catch( (err) => {
         console.log(err)
         bot.reply(message, `Apparently, I am unable. Try again or ask someone for help. \n\n${err.stack}`)
@@ -145,7 +145,7 @@ controller.hears(['leave'], 'direct_mention', async (bot, message) => {
 
 const acceptRequest = async (convoOrMessage, request) => {
   say(convoOrMessage, `Inviting ${request.name} to join this space`)
-  actions.invite(request)
+  spark.invite(request)
   store.removeRequest(request)
 }
 
@@ -220,9 +220,9 @@ const askWho = (message, requests, command) => {
 
 const requireModerator = async (bot, message) => {
   // if there are no other moderators, anyone is allowed to use Doorman
-  if (! await actions.anyOtherModerators(message.channel, botEmail)) return true
+  if (! await spark.anyOtherModerators(message.channel, botEmail)) return true
 
-  const { isModerator } = await actions.findMembership(message.channel, {personEmail: message.user})
+  const { isModerator } = await spark.findMembership(message.channel, {personEmail: message.user})
 
   if (!isModerator) bot.reply(message, 'Sorry, I only answer to moderators')
 

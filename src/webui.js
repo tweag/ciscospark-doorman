@@ -11,7 +11,7 @@ const urls = publicAddress => {
   }
 }
 
-const setupApp = (app, actions, store, bot) => {
+const setupApp = (app, spark, store, bot) => {
   app.use(bodyParser.urlencoded())
   app.set('views', 'src/templates')
   app.set('view engine', 'pug')
@@ -20,7 +20,7 @@ const setupApp = (app, actions, store, bot) => {
   router.get('/space/:roomId', (req, res) => {
     const { params: { roomId } } = req
 
-    actions.getRoom(roomId).then( room =>
+    spark.getRoom(roomId).then( room =>
       res.render('index', { room: room })
     )
   })
