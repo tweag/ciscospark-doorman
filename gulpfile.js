@@ -34,6 +34,20 @@ gulp.task('watch-sass', ['sass'], function() {
   return gulp.watch([`${stylesheetsDir}/**/*.scss`], ['sass']);
 });
 
+
+function cleanTask(name, dir) {
+  gulp.task(`clean-${name}`, function() {
+    return gulp.src(dir, {read: false})
+      .pipe($.clean());
+  });
+}
+
+cleanTask('sass', 'public/stylesheets/*');
+cleanTask('images', 'public/images/*');
+cleanTask('transpiled', 'lib/*');
+
+gulp.task('clean', ['clean-sass', 'clean-images', 'clean-transpiled'])
+
 gulp.task('build', ['images', 'sass']);
 
 gulp.task('default', ['build', 'watch-sass']);
