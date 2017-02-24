@@ -19,7 +19,7 @@ Here are instructions for deploying on Heroku, but this can be adapted to any ho
 2. Clone this repo
 3. Create a new app on heroku
 
-        heroku apps:create my-doorman-bot`
+        heroku apps:create my-doorman-bot
 
 4. Add environment variables to the heroku app to match those in `.env`.
    e.g.
