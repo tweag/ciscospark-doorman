@@ -4,7 +4,7 @@ import includes from 'lodash/includes'
 import controller from './controller'
 import webui from './webui'
 import actionsBuilder from './actions'
-import storeBuilder from './store'
+import Store from './Store'
 import matchRequest from './util/matchRequest'
 import orText from './util/orText'
 import u from './util/unindent'
@@ -13,7 +13,7 @@ const bot = controller.spawn({})
 const urls = webui.urls(process.env.PUBLIC_ADDRESS) // TODO: grab this from controller.config
 const botEmail = process.env.BOT_EMAIL
 const actions = actionsBuilder(controller.api, botEmail)
-const store = storeBuilder(controller.storage)
+const store = new Store(controller.storage)
 
 const md = str => ({
   markdown: u(str),

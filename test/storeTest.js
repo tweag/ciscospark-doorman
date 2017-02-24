@@ -2,10 +2,10 @@ import test from 'ava'
 
 import inMemoryStore from './_inMemoryStore'
 
-import store from '../src/store'
+import Store from '../src/Store'
 
 test.beforeEach( t => {
-  t.context.store = store(inMemoryStore())
+  t.context.store = new Store(inMemoryStore())
 })
 
 test('addRequest adds items to the end of the list', async t => {

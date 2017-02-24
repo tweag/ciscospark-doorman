@@ -1,9 +1,10 @@
 import 'babel-polyfill'
 import express from 'express'
 import webui from './webui'
-import storeBuilder from './store'
+import Store from './Store'
+import inMemoryStore from '../test/_inMemoryStore'
 
-const store = storeBuilder({ channels: {} })
+const store = new Store(inMemoryStore())
 
 const dummyActions = {
   getRoom: () => Promise.resolve({ title: "Movers & Shakers" })
