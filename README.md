@@ -72,3 +72,14 @@ If you want to redesign the web UI, use these commands to start a server and wat
 
     yarn install
     npm run webui-dev
+
+### Tests
+
+Run the tests:
+
+    npm test
+
+Run the test watcher:
+
+    npm run test-watch
+
