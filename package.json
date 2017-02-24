@@ -22,7 +22,7 @@
     "build": "gulp build",
     "gulp": "gulp",
     "bower": "bower",
-    "postinstall": "npm rebuild node-sass  &&  npm run bower install  &&  npm run gulp clean  &&  npm run gulp build",
+    "postinstall": "echo 'rebuild node-sass b/c Yarn bug'  &&  npm rebuild node-sass  &&  npm run bower install  &&  npm run gulp clean  &&  npm run gulp build",
     "heroku-postbuild": "npm run gulp clean-transpiled  &&  npm run transpile"
   },
   "author": "",
