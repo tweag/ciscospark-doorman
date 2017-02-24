@@ -2,50 +2,48 @@ import flow from 'lodash/fp/flow'
 import filter from 'lodash/fp/filter'
 import reject from 'lodash/fp/reject'
 
-export default api => {
-  const makeMemberModerator = async (membershipId, isModerator) => {
-    const membership = await api.memberships.get(membershipId)
-    await api.memberships.update({ ...membership, isModerator })
+export default class {
+  constructor(api) {
+    this.memberships = api.memberships
+    this.rooms = api.rooms
   }
 
-  const findMembership = (roomId, userParams) =>
-    api.memberships.list({...userParams, roomId}).then( ([membership]) => membership )
-
-  const makeUserModerator = async (roomId, userParams) => {
-    const {id} = await findMembership(roomId, userParams)
-    await makeMemberModerator(id, true)
+  makeMemberModerator = async (membershipId, isModerator) => {
+    const membership = await this.memberships.get(membershipId)
+    await this.memberships.update({ ...membership, isModerator })
   }
 
-  const leaveRoom = (roomId, personEmail) =>
-    findMembership(roomId, {personEmail}).then( (membership) => api.memberships.remove(membership) )
+  findMembership = (roomId, userParams) =>
+    this.memberships.list({...userParams, roomId})
+      .then( ([membership]) => membership )
 
-  const getRoom = async id => {
-    const [room] = await api.rooms.list({ id, max: 1 })
+  makeUserModerator = async (roomId, userParams) => {
+    const {id} = await this.findMembership(roomId, userParams)
+    await this.makeMemberModerator(id, true)
+  }
+
+  leaveRoom = async (roomId, personEmail) => {
+    const membership = await this.findMembership(roomId, {personEmail})
+    this.memberships.remove(membership)
+  }
+
+  getRoom = async id => {
+    const [room] = await this.rooms.list({ id, max: 1 })
     return room
   }
 
-  const invite = ({roomId, email}) =>
-    api.memberships.create({ roomId, personEmail: email })
+  invite = ({roomId, email}) =>
+    this.memberships.create({ roomId, personEmail: email })
 
-  const findOtherModerators = async (roomId, personEmail) => {
+  findOtherModerators = async (roomId, personEmail) => {
     // use spread to make it an actual Array
-    const [...memberships] = await api.memberships.list({roomId})
+    const [...memberships] = await this.memberships.list({roomId})
     return flow(
       filter({ isModerator: true }),
       reject({ personEmail }),
     )(memberships)
   }
 
-  const anyOtherModerators = (...args) =>
-    findOtherModerators(...args).then( otherMods => !!otherMods.length )
-
-  return {
-    findMembership,
-    getRoom,
-    invite,
-    leaveRoom,
-
-    anyOtherModerators,
-    makeUserModerator,
-  }
+  anyOtherModerators = (...args) =>
+    this.findOtherModerators(...args).then( otherMods => !!otherMods.length )
 }

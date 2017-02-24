@@ -7,7 +7,7 @@ import inMemoryStore from '../test/_inMemoryStore'
 const store = new Store(inMemoryStore())
 
 const dummyActions = {
-  getRoom: () => Promise.resolve({ title: "Movers & Shakers" })
+  getRoom: async () => ({ title: "Movers & Shakers" })
 }
 
 const dummyBot = {
