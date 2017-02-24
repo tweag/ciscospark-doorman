@@ -29,9 +29,9 @@ controller.setupWebserver(process.env.PORT || 3000, (err, webserver) => {
 
 const api = controller.api
 
-controller.on('bot_room_join', async (bot, message) => {
+controller.on('bot_space_join', async (bot, message) => {
   const welcomeText =
-    "Hi! I'm Doorman. I can help you invite users by giving them a URL where they can request access to this room."
+    "Hi! I'm Doorman. I can help you invite users by giving them a URL where they can request access to this space."
 
   let askedForModeratorship
 
@@ -40,14 +40,15 @@ controller.on('bot_room_join', async (bot, message) => {
 
     bot.reply(message, u(`
       ${welcomeText}
-      I took the liberty of making myself a moderator of this space so that I can add people to it.
-      To invite people to this room, give them this URL:
+      I took the liberty of maimoderator of this space so that I can add people to it.
+      To invite people to this space, give them this URL:
       ${urls.roomInvitation(message.channel)}
     `))
 
     askedForModeratorship = false
 
-  } catch (e) {
+  } catch (err) {
+    console.log(err)
 
     bot.reply(message, u(`
       ${welcomeText}
@@ -70,7 +71,7 @@ controller.on('memberships.updated', async (bot, message) => {
 
     bot.reply(message, u(`
       Wonderful! Thanks for making me a moderator. Now we can get started.
-      To invite people to this room, give them this URL:
+      To invite people to this space, give them this URL:
       ${urls.roomInvitation(message.channel)}
     `))
 
