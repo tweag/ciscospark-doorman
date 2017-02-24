@@ -1295,9 +1295,9 @@ botkit-studio-sdk@^1.0.0:
     promise "^7.1.1"
     request "^2.67.0"
 
-"botkit@https://cl.ly/0m2I093Z3A3k/promptworks-botkit-ciscospark-5ef6eb43d0edc6350ef04a2ba5da2a866c3b8506.tar.gz":
-  version "0.4.7"
-  resolved "https://cl.ly/0m2I093Z3A3k/promptworks-botkit-ciscospark-5ef6eb43d0edc6350ef04a2ba5da2a866c3b8506.tar.gz#055adbf0c7034146414dbb9ae85a7d6480761c01"
+botkit@^0.5.1:
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/botkit/-/botkit-0.5.1.tgz#d81fefb1ab5f6650e18a9a5089a4957bb2e9f64d"
   dependencies:
     async "^2.0.0-rc.5"
     back "^1.0.1"
