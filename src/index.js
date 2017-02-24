@@ -3,12 +3,12 @@ import includes from 'lodash/includes'
 
 import controller from './controller'
 import webui from './webui'
-import Spark from './Spark'
-import Store from './Store'
-import matchRequest from './util/matchRequest'
-import orText from './util/orText'
+import Spark from './spark'
+import Store from './store'
+import matchRequest from './util/match-request'
+import orText from './util/or-text'
 import u from './util/unindent'
-import md from './util/markdownMessage'
+import md from './util/markdown-message'
 
 const bot = controller.spawn({})
 const urls = webui.urls(process.env.PUBLIC_ADDRESS)

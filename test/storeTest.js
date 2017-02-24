@@ -1,8 +1,8 @@
 import test from 'ava'
 
-import inMemoryStore from './_inMemoryStore'
+import inMemoryStore from './_in-memory-store'
 
-import Store from '../src/Store'
+import Store from '../src/store'
 
 test.beforeEach( t => {
   t.context.store = new Store(inMemoryStore())

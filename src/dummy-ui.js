@@ -1,8 +1,8 @@
 import 'babel-polyfill'
 import express from 'express'
 import webui from './webui'
-import Store from './Store'
-import inMemoryStore from '../test/_inMemoryStore'
+import Store from './store'
+import inMemoryStore from '../test/_in-memory-store'
 
 const store = new Store(inMemoryStore())
 
