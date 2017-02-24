@@ -7,7 +7,6 @@ import Spark from './spark'
 import Store from './store'
 import matchRequest from './util/match-request'
 import orText from './util/or-text'
-import u from './util/unindent'
 import md from './util/markdown-message'
 
 const bot = controller.spawn({})
@@ -73,9 +72,11 @@ controller.on('memberships.updated', async (bot, message) => {
     && personEmail == botEmail
     && await store.didAskForModeratorship(message.channel)) {
 
-    bot.reply(message, u(`
+    bot.reply(message, md(`
       Wonderful! Thanks for making me a moderator. Now we can get started.
+
       To invite people to this space, give them this URL:
+
       ${urls.roomInvitation(message.channel)}
     `))
 
