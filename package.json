@@ -28,7 +28,6 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "ava": "^0.17.0",
     "babel-cli": "^6.18.0",
     "babel-core": "^6.22.1",
     "babel-eslint": "^7.1.1",
@@ -36,15 +35,9 @@
     "babel-plugin-transform-object-rest-spread": "^6.23.0",
     "babel-polyfill": "^6.20.0",
     "babel-preset-env": "^1.1.8",
-    "babel-watch": "^2.0.5",
     "botkit": "^0.5.1",
     "botkit-storage-redis": "^1.1.0",
     "bower": "^1.8.0",
-    "concurrently": "^3.3.0",
-    "eslint": "^3.13.1",
-    "eslint-config-standard": "^6.2.1",
-    "eslint-plugin-promise": "^3.4.0",
-    "eslint-plugin-standard": "^2.0.1",
     "gulp": "^3.9.0",
     "gulp-autoprefixer": "^3.1.0",
     "gulp-load-plugins": "^1.1.0",
@@ -53,6 +46,15 @@
     "node-sass": "^4.5.0",
     "promisify-node": "^0.4.0",
     "pug": "^2.0.0-beta11"
+  },
+  "devDependencies": {
+    "ava": "^0.17.0",
+    "babel-watch": "^2.0.5",
+    "concurrently": "^3.3.0",
+    "eslint": "^3.13.1",
+    "eslint-config-standard": "^6.2.1",
+    "eslint-plugin-promise": "^3.4.0",
+    "eslint-plugin-standard": "^2.0.1"
   },
   "ava": {
     "files": [
