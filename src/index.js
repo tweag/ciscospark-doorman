@@ -11,7 +11,7 @@ import u from './util/unindent'
 import md from './util/markdownMessage'
 
 const bot = controller.spawn({})
-const urls = webui.urls(process.env.PUBLIC_ADDRESS) // TODO: grab this from controller.config
+const urls = webui.urls(process.env.PUBLIC_ADDRESS)
 const botEmail = process.env.BOT_EMAIL
 const spark = new Spark(controller.api)
 const store = new Store(controller.storage)
