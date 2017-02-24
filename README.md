@@ -36,13 +36,39 @@ Here are instructions for deploying on Heroku, but this can be adapted to any ho
 
 ## Development
 
-### WebUI
+### Work on the bot
 
-```
-git clone promptworks/botkit-ciscospark
-git clone promptworks/ciscospark-doorman
-co ciscospark-doorman
-yarn install
-bower install
-npm run webui-dev
-```
+
+1. [Create a new bot account](https://developer.ciscospark.com/add-bot.html) on Cisco Spark
+
+2. Clone this repo
+
+3. Install dependencies
+
+        yarn install
+
+4. Install Redis.
+  If you're on a Mac, do `brew install redis`
+
+5. Copy `.env` to `.env.local` and customize
+
+        cp .env .env.local
+
+5. Start the local development server
+
+        npm start
+
+6. Run ngrok (or something like it).
+
+    Because Spark uses webhooks to talk to bots, you must run something like ngrok locally to expose your server to the web.
+    We've included a script to do this for you (requires ngrok)
+
+        npm run ngrok
+
+
+### Work on the web UI
+
+If you want to redesign the web UI, use these commands to start a server and watch the stylesheets directory for changes.
+
+    yarn install
+    npm run webui-dev
