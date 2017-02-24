@@ -38,10 +38,13 @@ controller.on('bot_space_join', async (bot, message) => {
   try {
     await spark.makeUserModerator(message.channel, { personEmail: botEmail })
 
-    bot.reply(message, u(`
+    bot.reply(message, md(`
       ${welcomeText}
-      I took the liberty of maimoderator of this space so that I can add people to it.
+
+      I took the liberty of making myself a moderator of this space so that I can add people to it.
+
       To invite people to this space, give them this URL:
+
       ${urls.roomInvitation(message.channel)}
     `))
 
@@ -50,8 +53,9 @@ controller.on('bot_space_join', async (bot, message) => {
   } catch (err) {
     console.log(err)
 
-    bot.reply(message, u(`
+    bot.reply(message, md(`
       ${welcomeText}
+
       Before we get started, you need to make me a moderator. The People menu is up there ↗️
     `))
 
@@ -94,7 +98,9 @@ if (process.env.ALLOW_DEBUG_COMMANDS === '1') {
 }
 
 const displayHelp = (bot, message) => bot.reply(message, md(`
-  Send people here to get an invitation: ${urls.roomInvitation(message.channel)}
+  Send people here to get an invitation:
+
+  ${urls.roomInvitation(message.channel)}
 
   Things I can do:
 
