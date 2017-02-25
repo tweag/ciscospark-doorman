@@ -27,10 +27,7 @@ export default class {
     this.memberships.remove(membership)
   }
 
-  getRoom = async id => {
-    const [room] = await this.rooms.list({ id, max: 1 })
-    return room
-  }
+  getRoom = id => this.rooms.get(id)
 
   invite = ({roomId, email}) =>
     this.memberships.create({ roomId, personEmail: email })
