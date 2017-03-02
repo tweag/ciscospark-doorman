@@ -1,5 +1,7 @@
 .env.local
 lib
+.env
+.gitignore
 
 # OSX
 
