@@ -34,7 +34,7 @@ const setupApp = (app, spark, store, bot) => {
     const { name, title, city, email } = membershipRequest
 
     bot.say({
-      markdown: `**${name}** (${title}, ${email}) from ${city} requests to join this space. Mention me with **accept** or **deny**`,
+      markdown: `**${name}** (${title}) from ${city} requests to join this space. Mention me with **accept** or **deny**`,
       channel: roomId
     })
 
