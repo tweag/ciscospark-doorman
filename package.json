@@ -4,7 +4,7 @@
   "description": "Bot helps onboard new employees",
   "main": "lib/index.js",
   "engines": {
-    "node": "~7.4"
+    "node": "7.10.1"
   },
   "scripts": {
     "prod": "node lib/index.js",
