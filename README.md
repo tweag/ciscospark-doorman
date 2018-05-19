@@ -45,6 +45,7 @@ Here are instructions for deploying on Heroku, but this can be adapted to any ho
 
 3. Install dependencies
 
+        nvm install
         yarn install
 
 4. Install Redis.
